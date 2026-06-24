@@ -95,6 +95,12 @@
   input.sel{cursor:text}
   select.sel,select.roleas{color-scheme:dark}
   .sel option,.roleas option{background:#111827;color:#e2e8f0}
+  .moredrop{position:relative;flex:none}
+  .moremenu{position:absolute;top:calc(100% + 6px);right:0;background:#0d1424;border:1px solid var(--line);border-radius:11px;padding:5px;min-width:160px;display:none;z-index:60;box-shadow:0 12px 32px rgba(0,0,0,.5)}
+  .moremenu.open{display:block}
+  .mitem{padding:8px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap;font-weight:500}
+  .mitem:hover{background:rgba(255,255,255,.06);color:#fff}
+  .mitem.active{color:var(--sky-2);background:rgba(14,165,233,.12)}
 
   .tw{overflow-x:auto}
   table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;min-width:560px}
@@ -291,6 +297,16 @@
     <div class="tab" data-v="team">Team</div>
     <div class="tab" data-v="permissions">Permissions</div>
     <div class="tab" data-v="setup">⚙ Setup</div>
+    <div class="moredrop">
+      <div class="tab" id="moreBtn">More ▾</div>
+      <div class="moremenu" id="moreMenu">
+        <div class="mitem" data-v="targets">Targets</div>
+        <div class="mitem" data-v="access">Access</div>
+        <div class="mitem" data-v="settings">Settings</div>
+        <div class="mitem" data-v="audit">Audit</div>
+        <div class="mitem" data-v="performance">Performance</div>
+      </div>
+    </div>
   </div>
   <select id="roleAs" class="roleas" aria-label="View the app as a role"></select>
   <div class="demo-pill"><span class="dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24"></span>Demo</div>
@@ -449,6 +465,52 @@
     <div class="panel" style="max-width:560px;margin:0 auto"><div id="wizard"></div></div>
   </section>
 
+  <!-- TARGETS -->
+  <section class="view" id="targets">
+    <div class="head"><div><div class="title">Targets</div><div class="sub">Company, team and agent goals — most-specific scope wins (agent → team → global)</div></div></div>
+    <div class="panel"><div class="tw"><table>
+      <thead><tr><th>Scope</th><th>Avg score target</th><th>Max critical rate</th><th>Min coached %</th></tr></thead>
+      <tbody id="targetRows"></tbody>
+    </table></div></div>
+  </section>
+
+  <!-- ACCESS -->
+  <section class="view" id="access">
+    <div class="head"><div><div class="title">Access management</div><div class="sub">Per-tool roles for the Quality app — invite users and assign roles</div></div></div>
+    <div class="panel">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)">
+        <input class="sel" style="flex:1;min-width:200px" placeholder="new.user@acme.com">
+        <select class="sel"><option>agent</option><option>team_lead</option><option>qa_evaluator</option><option>admin</option></select>
+        <button class="btn btn-primary" onclick="alert('Demo only — grants the role and emails an invite.')">Grant access</button>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>User</th><th>Role</th><th>Granted by</th></tr></thead>
+        <tbody id="accessRows"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="view" id="settings">
+    <div class="head"><div><div class="title">Settings</div><div class="sub">App configuration (the <code style="color:#7dd3fc">app_config</code> table). Edit and save.</div></div></div>
+    <div class="panel"><div id="settingsRows"></div></div>
+  </section>
+
+  <!-- AUDIT -->
+  <section class="view" id="audit">
+    <div class="head"><div><div class="title">Audit log</div><div class="sub">Append-only record of every change — who did what, when</div></div></div>
+    <div class="panel"><div class="tw"><table>
+      <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Entity</th><th>Change</th></tr></thead>
+      <tbody id="auditRows"></tbody>
+    </table></div></div>
+  </section>
+
+  <!-- PERFORMANCE -->
+  <section class="view" id="performance">
+    <div class="head"><div><div class="title">Performance</div><div class="sub">Live API latency probes — endpoint response times and status</div></div></div>
+    <div class="panel"><div id="perfRows"></div></div>
+  </section>
+
 </div>
 
 <footer>
@@ -486,7 +548,13 @@ const PAGE_ACCESS={
   scorecard:   ["qa_evaluator","admin","system_admin"],
   permissions: ["system_admin"],
   setup: ROLES,   // always visible in the demo (it's the pre-app onboarding flow)
+  targets:     ["qa_evaluator","admin","system_admin"],
+  access:      ["admin","system_admin"],
+  settings:    ["admin","system_admin"],
+  audit:       ["admin","system_admin"],
+  performance: ["qa_evaluator","admin","system_admin"],
 };
+const MORE_VIEWS = ["targets","access","settings","audit","performance"];
 let currentRole="system_admin";
 const SELF_AGENT="bob";        // the signed-in person when "View as: Agent"
 const TL_TEAM="Team Alpha";    // the signed-in person's team when "View as: Team lead"
@@ -502,7 +570,13 @@ function scopeDisputes(list){
   return list;
 }
 function applyRole(){
-  document.querySelectorAll('.tab').forEach(t=>{ t.style.display=PAGE_ACCESS[t.dataset.v].includes(currentRole)?'':'none'; });
+  // primary tabs (skip the More button — it has no data-v)
+  document.querySelectorAll('.tab[data-v]').forEach(t=>{ t.style.display=PAGE_ACCESS[t.dataset.v].includes(currentRole)?'':'none'; });
+  // More-menu items + hide the whole More dropdown when none are allowed
+  document.querySelectorAll('.mitem').forEach(m=>{ m.style.display=PAGE_ACCESS[m.dataset.v].includes(currentRole)?'':'none'; });
+  const anyMore=MORE_VIEWS.some(v=>PAGE_ACCESS[v].includes(currentRole));
+  document.querySelector('.moredrop').style.display=anyMore?'':'none';
+  if(!anyMore) document.getElementById('moreMenu').classList.remove('open');
   if(!PAGE_ACCESS[document.querySelector('.view.active').id].includes(currentRole)) go('results');
   // scope note + restricted controls
   const sub=document.getElementById('resultsSub');
@@ -965,21 +1039,77 @@ function renderPermissions(){
 
 // ── Tabs / init ──
 function go(view){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===view));
+  document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active',t.dataset.v===view));
   document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active',s.id===view));
+  // keep the "More" button highlighted while one of its pages is open
+  document.getElementById('moreBtn').classList.toggle('active',MORE_VIEWS.includes(view));
+  document.getElementById('moreMenu').classList.remove('open');
   window.scrollTo({top:0,behavior:'smooth'});
 }
-document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>go(t.dataset.v)));
+document.querySelectorAll('.tab[data-v], .mitem').forEach(t=>t.addEventListener('click',()=>go(t.dataset.v)));
+const moreBtn=document.getElementById('moreBtn'), moreMenu=document.getElementById('moreMenu');
+moreBtn.addEventListener('click',e=>{ e.stopPropagation(); moreMenu.classList.toggle('open'); });
+document.addEventListener('click',e=>{ if(!e.target.closest('.moredrop')) moreMenu.classList.remove('open'); });
 const roleSel=document.getElementById('roleAs');
 roleSel.innerHTML=ROLES.map(r=>`<option value="${r}"${r==='system_admin'?' selected':''}>View as: ${ROLE_LABELS[r]}</option>`).join('');
 roleSel.addEventListener('change',()=>{currentRole=roleSel.value;applyRole();});
 ['fAgent','fChannel','fStatus'].forEach(id=>document.getElementById(id).addEventListener('change',renderRows));
 document.getElementById('fAgent').innerHTML='<option value="">All agents</option>'+Object.entries(AGENTS).map(([k,a])=>`<option value="${k}">${a.n}</option>`).join('');
 
+// ── More-menu admin pages ──
+function renderTargets(){
+  const rows=[["Global (company)",85,5,30],["Team Alpha",88,4,35],["Team Beta",83,6,30],["alice@example.com",92,2,25],["bob@example.com",80,8,40]];
+  document.getElementById('targetRows').innerHTML=rows.map(([s,a,c,co])=>`
+    <tr><td class="pg" style="color:#e2e8f0;font-weight:600">${s}</td>
+      <td><span class="score" style="color:${scoreColor(a)}">${a}%</span></td>
+      <td class="tnum" style="color:#cbd5e1">${c}%</td><td class="tnum" style="color:#cbd5e1">${co}%</td></tr>`).join('');
+}
+function renderAccess(){
+  const rows=[["qa.lead@acme.com","super_admin","system"],["qa.two@acme.com","qa_evaluator","qa.lead@acme.com"],
+    ["lead.alpha@example.com","team_lead","qa.lead@acme.com"],["lead.beta@example.com","team_lead","qa.lead@acme.com"],
+    ["alice@example.com","agent","self-signup"],["bob@example.com","agent","self-signup"]];
+  const tint={super_admin:"b-crit",qa_evaluator:"b-chat",team_lead:"b-call",agent:"b-disp"};
+  document.getElementById('accessRows').innerHTML=rows.map(([e,r,g])=>`
+    <tr><td style="color:#e2e8f0">${e}</td><td><span class="badge ${tint[r]||'b-disp'}">${r}</span></td>
+      <td style="color:#94a3b8">${g}</td></tr>`).join('');
+}
+function renderSettings(){
+  const rows=[["company_name","Acme Support"],["allowed_email_domain","acme.com"],["coaching_threshold","85"],
+    ["scorecard_name","Sample QA Scorecard"],["digest_tz","UTC"],["rotation_anchor","2026-01-04"]];
+  document.getElementById('settingsRows').innerHTML=rows.map(([k,v])=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04)">
+      <code style="color:#7dd3fc;font-size:12.5px;width:200px;flex:none">${k}</code>
+      <input class="sel" style="flex:1" value="${v}"><button class="btn btn-ghost" onclick="alert('Demo only — saves to app_config.')">Save</button></div>`).join('');
+}
+function renderAudit(){
+  const rows=[["21:04","qa.lead@acme.com","CREATE","qa_evaluation","#48261 · score 100"],
+    ["20:51","qa.lead@acme.com","COACH","qa_coaching","Dave Example"],
+    ["20:33","lead.alpha@example.com","DISPUTE","qa_dispute","#48201 → pending QA"],
+    ["19:58","admin@acme.com","UPDATE","app_config","coaching_threshold 80 → 85"],
+    ["19:40","qa.two@acme.com","ASSIGN","qa_group","Group B → qa.two@acme.com"],
+    ["18:22","admin@acme.com","CREATE","app_access","erin@example.com = agent"]];
+  document.getElementById('auditRows').innerHTML=rows.map(([t,a,ac,e,c])=>`
+    <tr><td class="tnum" style="color:#94a3b8">${t}</td><td style="color:#cbd5e1">${a}</td>
+      <td><span class="badge b-disp">${ac}</span></td><td style="color:#94a3b8">${e}</td><td style="color:#cbd5e1">${c}</td></tr>`).join('');
+}
+function renderPerformance(){
+  const rows=[["GET /api/analysis",142],["GET /api/evaluations",88],["GET /api/insights",119],["GET /api/assignments",73],
+    ["GET /api/lookups",54],["POST /api/evaluations",96],["GET /api/coaching-impact",134],["GET /api/health",21]];
+  document.getElementById('perfRows').innerHTML=rows.map(([ep,ms])=>{
+    const col=ms<100?'#34d399':ms<150?'#fbbf24':'#f87171';
+    return `<div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span class="dot" style="background:${col};box-shadow:0 0 6px ${col}"></span>
+      <code style="color:#cbd5e1;font-size:12.5px;flex:1">${ep}</code>
+      <div class="bartrack" style="width:140px"><div class="barfill" style="width:${Math.min(100,ms/2)}%;background:${col}"></div></div>
+      <span class="tnum" style="color:#fff;font-weight:700;width:54px;text-align:right">${ms}ms</span></div>`;
+  }).join('');
+}
+
 renderRows(); renderAnalysis();
 bars('failed',[["Minimized dead air",28],["Correct grammar & spelling",22],["Followed the workflow",16],["Empathetic tone",11],["Confirmed resolution",8]],true);
 renderCoaching(); renderLeaderboard(); renderInsights(); renderDisputes(); renderAssignments();
-renderBuilder(); renderEvalForm(); renderTeam(); renderPermissions(); applyRole();
+renderBuilder(); renderEvalForm(); renderTeam(); renderPermissions();
+renderTargets(); renderAccess(); renderSettings(); renderAudit(); renderPerformance(); applyRole();
 
 // ── Setup wizard mockup ──
 let wizStep=0;
