@@ -1,5 +1,7 @@
 # Rubric — open-source CX / support quality scorecards
 
+> *Rubric (noun): a scoring guide used to evaluate work — exactly what this gives support teams.*
+
 A self-hostable **quality-assurance platform for customer-support teams**. QA evaluators score
 support tickets, calls and chats against a fully customizable scorecard; the results power
 analytics, coaching, disputes, weekly evaluator rotations, targets and automated digests.
