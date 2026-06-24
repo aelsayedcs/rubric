@@ -18,7 +18,7 @@
   body{
     font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     background:var(--bg-base); color:var(--txt); min-height:100vh;
-    -webkit-font-smoothing:antialiased; line-height:1.5;
+    -webkit-font-smoothing:antialiased; line-height:1.5; color-scheme:dark;
     background-image:
       radial-gradient(ellipse 80% 60% at 50% -10%, rgba(14,165,233,.10), transparent),
       linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
@@ -93,6 +93,8 @@
        border:1px solid rgba(255,255,255,.1);color:#cbd5e1;cursor:pointer}
   .sel:focus{outline:none;border-color:rgba(14,165,233,.4)}
   input.sel{cursor:text}
+  select.sel,select.roleas{color-scheme:dark}
+  .sel option,.roleas option{background:#111827;color:#e2e8f0}
 
   .tw{overflow-x:auto}
   table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;min-width:560px}
@@ -307,8 +309,8 @@
   <!-- RESULTS -->
   <section class="view active" id="results">
     <div class="head">
-      <div><div class="title">Evaluations</div><div class="sub">Rolling 30 days · click a card to filter, a row for the full breakdown</div></div>
-      <button class="btn btn-primary" onclick="go('evaluate')">+ New evaluation</button>
+      <div><div class="title">Evaluations</div><div class="sub" id="resultsSub">Rolling 30 days · click a card to filter, a row for the full breakdown</div></div>
+      <button class="btn btn-primary" id="newEvalBtn" onclick="go('evaluate')">+ New evaluation</button>
     </div>
     <div class="kpis" id="kpis">
       <div class="kpi" data-f="all"><div class="lbl">Tickets Done</div><div class="val tnum">128</div><div class="delta up">▲ 12 vs prev</div></div>
@@ -336,18 +338,18 @@
     <div class="head">
       <div><div class="title">Analysis</div><div class="sub">Company target 85% · last 8 weeks</div></div>
       <div class="filters" style="margin:0">
-        <select class="sel"><option>Last 8 weeks</option><option>This quarter</option><option>This month</option></select>
-        <select class="sel"><option>All channels</option><option>Chat</option><option>Call</option><option>Tickets</option></select>
+        <select class="sel" id="anPeriod" onchange="renderAnalysis()"><option>Last 8 weeks</option><option>This quarter</option><option>This month</option></select>
+        <select class="sel" id="anChannel" onchange="renderAnalysis()"><option>All channels</option><option>Chat</option><option>Call</option><option>Tickets</option></select>
       </div>
     </div>
     <div class="statstrip">
-      <div class="stat"><div class="lbl">Avg score</div><div class="val">86.4%</div></div>
+      <div class="stat"><div class="lbl">Avg score</div><div class="val" id="stAvg">86.4%</div></div>
       <div class="stat"><div class="lbl">Critical rate</div><div class="val">5.5%</div></div>
       <div class="stat"><div class="lbl">Coached</div><div class="val">32%</div></div>
       <div class="stat"><div class="lbl">Open disputes</div><div class="val">2</div></div>
     </div>
     <div class="grid2">
-      <div class="panel"><div class="panel-h"><h3>Score trend vs target</h3><span class="meta">avg 86.4%</span></div><div class="chart" id="trend"></div></div>
+      <div class="panel"><div class="panel-h"><h3>Score trend vs target</h3><span class="meta" id="anAvg">avg 86.4%</span></div><div class="chart" id="trend"></div></div>
       <div class="panel"><div class="panel-h"><h3>By channel</h3></div><div style="padding:16px 18px" id="byChannel"></div></div>
     </div>
     <div class="grid2b" style="margin-top:16px">
@@ -478,10 +480,31 @@ const PAGE_ACCESS={
   permissions: ["system_admin"],
 };
 let currentRole="system_admin";
+const SELF_AGENT="bob";        // the signed-in person when "View as: Agent"
+const TL_TEAM="Team Alpha";    // the signed-in person's team when "View as: Team lead"
+// Mirror the app's RLS: agent sees own, team lead sees their team, QA/admin see all.
+function scopeEvals(list){
+  if(currentRole==="agent") return list.filter(e=>e.ag===SELF_AGENT);
+  if(currentRole==="team_lead") return list.filter(e=>AGENTS[e.ag].team===TL_TEAM);
+  return list;
+}
+function scopeDisputes(list){
+  if(currentRole==="agent") return list.filter(d=>d.ag===SELF_AGENT);
+  if(currentRole==="team_lead") return list.filter(d=>AGENTS[d.ag].team===TL_TEAM);
+  return list;
+}
 function applyRole(){
   document.querySelectorAll('.tab').forEach(t=>{ t.style.display=PAGE_ACCESS[t.dataset.v].includes(currentRole)?'':'none'; });
-  const active=document.querySelector('.view.active').id;
-  if(!PAGE_ACCESS[active].includes(currentRole)) go('results');
+  if(!PAGE_ACCESS[document.querySelector('.view.active').id].includes(currentRole)) go('results');
+  // scope note + restricted controls
+  const sub=document.getElementById('resultsSub');
+  if(currentRole==="agent") sub.textContent="Showing your own evaluations only";
+  else if(currentRole==="team_lead") sub.textContent="Showing your team · "+TL_TEAM;
+  else sub.textContent="Rolling 30 days · click a card to filter, a row for the full breakdown";
+  document.getElementById('newEvalBtn').style.display=PAGE_ACCESS.evaluate.includes(currentRole)?'':'none';
+  document.getElementById('fAgent').style.display=(currentRole==="agent")?'none':'';
+  activeFilter="all"; document.querySelectorAll('#kpis .kpi').forEach(k=>k.classList.remove('sel'));
+  renderResultsKpis(); renderRows(); renderDisputes();
 }
 
 // Sample scorecard (mirrors supabase/migrations/007_seed_scorecard.sql)
@@ -558,9 +581,39 @@ function tagBadges(tags){
 }
 
 let activeFilter="all";
+const COMPANY_KPIS=[
+  ['all','Tickets Done','128','<div class="delta up">▲ 12 vs prev</div>'],
+  ['all','Avg Score','86.4%','<div class="delta up">▲ 2.1 pts</div>'],
+  ['crit','Critical','7','<div class="delta down">▲ 2</div>'],
+  ['coached','Coached','41','<div class="delta up">32% of evals</div>'],
+  ['needs','Needs Coaching','19','<div class="delta down">below 85%</div>'],
+  ['disp','Disputed','5','<div class="delta">2 pending</div>'],
+];
+function renderResultsKpis(){
+  let cards;
+  if(currentRole==="agent"||currentRole==="team_lead"){
+    const ev=scopeEvals(EVALS), n=ev.length;
+    const avg=n?(ev.reduce((s,e)=>s+e.s,0)/n).toFixed(1):'0';
+    const c=t=>ev.filter(e=>e.tags.includes(t)).length;
+    cards=[['all','Tickets',n,''],['all','Avg Score',avg+'%',''],['crit','Critical',c('crit'),''],
+      ['coached','Coached',c('coached'),''],['needs','Needs Coaching',c('needs'),''],['disp','Disputed',c('disp'),'']];
+  } else cards=COMPANY_KPIS;
+  document.getElementById('kpis').innerHTML=cards.map(([f,l,val,d])=>`
+    <div class="kpi" data-f="${f}"><div class="lbl">${l}</div><div class="val tnum">${val}</div>${d}</div>`).join('');
+  wireKpis();
+}
+function wireKpis(){
+  document.querySelectorAll('#kpis .kpi').forEach(k=>k.addEventListener('click',()=>{
+    const f=k.dataset.f;
+    document.querySelectorAll('#kpis .kpi').forEach(x=>x.classList.remove('sel'));
+    if(activeFilter===f||f==="all"){activeFilter="all";}
+    else{activeFilter=f;k.classList.add('sel');}
+    renderRows();
+  }));
+}
 function renderRows(){
   const fa=v('fAgent'), fc=v('fChannel'), fs=v('fStatus');
-  const rows = EVALS.filter(e=>{
+  const rows = scopeEvals(EVALS).filter(e=>{
     if(activeFilter!=="all" && !e.tags.includes(activeFilter)) return false;
     if(fa && e.ag!==fa) return false;
     if(fc && e.ch!==fc) return false;
@@ -603,9 +656,25 @@ function openDrawer(idx){
       body+=`<div class="cr"><span class="crl">${it.l}${it.crit?' <span class="ctag" style="margin-left:4px">CRITICAL</span>':''}</span><span class="res ${cls}">${lbl}</span></div>`;
     });
   });
-  body+=`<button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:16px" onclick="openCoach('${a.n}')">Coach ${a.n.split(' ')[0]} →</button></div>`;
+  // Coaching panel — mirrors the app: a coached agent can Acknowledge; coaches can Coach.
+  const canCoach=["team_lead","qa_evaluator","admin","system_admin"].includes(currentRole);
+  if(e.tags.includes('coached')){
+    body+=`<div class="sec-lbl">Coaching</div>
+      <div style="font-size:12.5px;color:#cbd5e1;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:11px 13px;line-height:1.7">
+        <b style="color:#34d399">Strengths:</b> Clear, friendly communication.<br>
+        <b style="color:#fbbf24">Improve:</b> Reduce dead air; confirm resolution before closing.<br>
+        <b style="color:#38bdf8">Action plan:</b> Shadow a senior agent on 3 interactions this week.</div>`;
+    if(currentRole==='agent')
+      body+=`<button class="btn btn-primary" id="ackBtn" style="width:100%;justify-content:center;margin-top:12px" onclick="ackCoach()">Acknowledge coaching</button>`;
+    else
+      body+=`<div style="font-size:12px;color:var(--faint);margin-top:10px;text-align:center">Awaiting the agent’s acknowledgement</div>`;
+  } else if(canCoach){
+    body+=`<button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:16px" onclick="openCoach('${a.n}')">Coach ${a.n.split(' ')[0]} →</button>`;
+  }
+  body+=`</div>`;
   showDrawer(body);
 }
+function ackCoach(){const b=document.getElementById('ackBtn');if(b)b.outerHTML='<div style="text-align:center;color:#34d399;font-weight:700;font-size:13px;margin-top:12px">✓ Coaching acknowledged</div>';}
 function showDrawer(html){const dr=document.getElementById('drawer');dr.innerHTML=html;dr.classList.add('open');dr.setAttribute('aria-hidden','false');document.getElementById('scrim').classList.add('open');}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').setAttribute('aria-hidden','true');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeCoach();}});
@@ -662,8 +731,26 @@ function openDispute(idx){
     </div><div class="sec-lbl">Decision thread</div>`;
   steps.forEach(s=>{ body+=`<div class="thr"><span class="tdot" style="background:${s.c}${s.pending?';opacity:.5':''}"></span>
       <div><div class="twho">${s.who} <span class="twhen">· ${s.when}</span></div><div class="tbody"${s.pending?' style="opacity:.65"':''}>${s.body}</div></div></div>`; });
+  // Role-aware actions (mirrors the app: TL acts on pending_tl, QA on pending_qa)
+  let actions='';
+  const canTL=["team_lead","qa_evaluator","admin","system_admin"].includes(currentRole);
+  const canQA=["qa_evaluator","admin","system_admin"].includes(currentRole);
+  if(x.st==='pending_tl' && canTL) actions=`
+    <button class="btn btn-ghost" style="color:#34d399" onclick="disputeAct('TL approve')">Approve</button>
+    <button class="btn btn-ghost" style="color:#f87171" onclick="disputeAct('TL reject')">Reject</button>`;
+  else if(x.st==='pending_qa' && canQA) actions=`
+    <button class="btn btn-ghost" style="color:#34d399" onclick="disputeAct('QA approve')">QA Approve</button>
+    <button class="btn btn-ghost" style="color:#f87171" onclick="disputeAct('QA reject')">Reject</button>
+    <button class="btn btn-ghost" style="color:#38bdf8" onclick="alert('Demo only — opens the evaluation editor to re-score it.')">Edit &amp; re-score</button>`;
+  if(actions) body+=`<div class="sec-lbl">Your decision</div><div style="display:flex;gap:8px;flex-wrap:wrap">${actions}</div>`;
   body+=`</div>`;
   showDrawer(body);
+}
+function disputeAct(label){
+  const c=prompt(label+' — add a comment (optional):');
+  if(c===null) return;
+  closeDrawer();
+  alert('Demo only — in the app this records the "'+label+'" decision'+(c?' with your comment':'')+', advances the dispute, and notifies the agent and QA.');
 }
 // Coaching modal
 function openCoach(name){
@@ -680,14 +767,28 @@ function openCoach(name){
 function closeCoach(){document.getElementById('coachScrim').classList.remove('open');}
 
 // ── Analysis ──
-function renderTrend(){
-  const data=[82,84,83,87,85,88,86,90], target=85, W=520,H=190,pad=28, max=100,min=60;
+function renderAnalysis(){
+  const period=document.getElementById('anPeriod').value;
+  const chan=document.getElementById('anChannel').value;
+  const base={'All channels':[82,84,83,87,85,88,86,90],'Chat':[86,88,87,90,89,91,90,92],'Call':[76,79,78,81,80,83,82,85],'Tickets':[80,82,81,84,83,85,84,86]};
+  let series=(base[chan]||base['All channels']).slice();
+  if(period==='This month') series=series.slice(-4);
+  else if(period==='This quarter') series=series.concat([89,91,90,92]).slice(-12);
+  renderTrend(series);
+  const avg=(series.reduce((a,b)=>a+b,0)/series.length).toFixed(1);
+  document.getElementById('anAvg').textContent='avg '+avg+'%';
+  document.getElementById('stAvg').textContent=avg+'%';
+  const all=[["Chat",88,"#60a5fa"],["Call",81,"#c084fc"],["Tickets",84,"#f472b6"]];
+  bars('byChannel', chan==='All channels'?all:all.filter(c=>c[0]===chan), false);
+}
+function renderTrend(data){
+  const target=85, W=520,H=190,pad=28, max=100,min=60;
   const x=i=>pad+i*((W-pad*2)/(data.length-1)), y=val=>H-pad-((val-min)/(max-min))*(H-pad*2);
   const pts=data.map((val,i)=>[x(i),y(val)]);
   const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
   const area=line+` L ${x(data.length-1).toFixed(1)} ${H-pad} L ${pad} ${H-pad} Z`, ty=y(target);
   let grid='';for(let g=60;g<=100;g+=10){const gy=y(g);grid+=`<line x1="${pad}" y1="${gy}" x2="${W-pad}" y2="${gy}" stroke="rgba(255,255,255,.05)"/><text x="6" y="${gy+3}" fill="#475569" font-size="9">${g}</text>`;}
-  const labels=['W1','W2','W3','W4','W5','W6','W7','W8'].map((l,i)=>`<text x="${x(i)}" y="${H-8}" fill="#64748b" font-size="9" text-anchor="middle">${l}</text>`).join('');
+  const labels=data.map((_,i)=>`<text x="${x(i)}" y="${H-8}" fill="#64748b" font-size="9" text-anchor="middle">W${i+1}</text>`).join('');
   document.getElementById('trend').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Score trend">
       <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0ea5e9" stop-opacity=".35"/><stop offset="1" stop-color="#0ea5e9" stop-opacity="0"/></linearGradient></defs>
       ${grid}<line x1="${pad}" y1="${ty}" x2="${W-pad}" y2="${ty}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4 4" opacity=".7"/>
@@ -742,15 +843,20 @@ const DISPUTES=[
 ];
 const DST={pending_tl:["b-needs","Pending TL"],pending_qa:["b-needs","Pending QA"],approved_tl:["b-coached","Approved (TL)"],approved_qa:["b-coached","Approved"],rejected_qa:["b-crit","Rejected"]};
 function renderDisputes(){
+  const list=scopeDisputes(DISPUTES);
+  const pending=list.filter(d=>d.st.startsWith('pending')).length;
+  const approved=list.filter(d=>d.st.startsWith('approved')).length;
+  const rejected=list.filter(d=>d.st.startsWith('rejected')).length;
   document.getElementById('dispKpis').innerHTML=`
-    <div class="kpi" style="cursor:default"><div class="lbl">Total</div><div class="val tnum">5</div></div>
-    <div class="kpi" style="cursor:default"><div class="lbl">Pending</div><div class="val tnum">2</div></div>
-    <div class="kpi" style="cursor:default"><div class="lbl">Approved</div><div class="val tnum">2</div></div>
-    <div class="kpi" style="cursor:default"><div class="lbl">Rejected</div><div class="val tnum">1</div></div>`;
-  document.getElementById('dispRows').innerHTML=DISPUTES.map((x,i)=>{const a=AGENTS[x.ag],st=DST[x.st];return `
+    <div class="kpi" style="cursor:default"><div class="lbl">Total</div><div class="val tnum">${list.length}</div></div>
+    <div class="kpi" style="cursor:default"><div class="lbl">Pending</div><div class="val tnum">${pending}</div></div>
+    <div class="kpi" style="cursor:default"><div class="lbl">Approved</div><div class="val tnum">${approved}</div></div>
+    <div class="kpi" style="cursor:default"><div class="lbl">Rejected</div><div class="val tnum">${rejected}</div></div>`;
+  document.getElementById('dispRows').innerHTML=list.map(x=>{const i=DISPUTES.indexOf(x),a=AGENTS[x.ag],st=DST[x.st];return `
     <tr class="clk" onclick="openDispute(${i})"><td><div class="agent-cell"><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>${a.n}</div></td>
       <td><span class="ticket">#${x.t}</span></td><td><span class="badge ${st[0]}">${st[1]}</span></td>
-      <td class="tnum" style="color:#94a3b8">${x.sub}</td><td class="tnum" style="color:#94a3b8">${x.upd}</td></tr>`;}).join('');
+      <td class="tnum" style="color:#94a3b8">${x.sub}</td><td class="tnum" style="color:#94a3b8">${x.upd}</td></tr>`;}).join('')
+    || `<tr><td colspan="5" style="text-align:center;color:#64748b;padding:28px">No disputes for this view.</td></tr>`;
 }
 
 // ── Assignments ──
@@ -859,17 +965,10 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>go(t
 const roleSel=document.getElementById('roleAs');
 roleSel.innerHTML=ROLES.map(r=>`<option value="${r}"${r==='system_admin'?' selected':''}>View as: ${ROLE_LABELS[r]}</option>`).join('');
 roleSel.addEventListener('change',()=>{currentRole=roleSel.value;applyRole();});
-document.querySelectorAll('#kpis .kpi').forEach(k=>k.addEventListener('click',()=>{
-  const f=k.dataset.f;
-  if(activeFilter===f||f==="all"){activeFilter="all";document.querySelectorAll('#kpis .kpi').forEach(x=>x.classList.remove('sel'));}
-  else{activeFilter=f;document.querySelectorAll('#kpis .kpi').forEach(x=>x.classList.remove('sel'));k.classList.add('sel');}
-  renderRows();
-}));
 ['fAgent','fChannel','fStatus'].forEach(id=>document.getElementById(id).addEventListener('change',renderRows));
 document.getElementById('fAgent').innerHTML='<option value="">All agents</option>'+Object.entries(AGENTS).map(([k,a])=>`<option value="${k}">${a.n}</option>`).join('');
 
-renderRows(); renderTrend();
-bars('byChannel',[["Chat",88,"#60a5fa"],["Call",81,"#c084fc"],["Tickets",84,"#f472b6"]],false);
+renderRows(); renderAnalysis();
 bars('failed',[["Minimized dead air",28],["Correct grammar & spelling",22],["Followed the workflow",16],["Empathetic tone",11],["Confirmed resolution",8]],true);
 renderCoaching(); renderLeaderboard(); renderInsights(); renderDisputes(); renderAssignments();
 renderBuilder(); renderEvalForm(); renderTeam(); renderPermissions(); applyRole();
