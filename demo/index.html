@@ -455,7 +455,7 @@
   <section class="view" id="permissions">
     <div class="head"><div><div class="title">Permissions</div><div class="sub">Editable page → role matrix. The app also enforces these checks server-side on every API route.</div></div></div>
     <div class="panel"><div class="tw"><table class="matrix">
-      <thead><tr><th>Page</th><th class="role">Agent</th><th class="role">Team lead</th><th class="role">QA evaluator</th><th class="role">Admin</th><th class="role">System admin</th></tr></thead>
+      <thead><tr id="permHeadRow"><th>Page</th></tr></thead>
       <tbody id="permRows"></tbody>
     </table></div></div>
   </section>
@@ -556,24 +556,34 @@ const initials = n => n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(
 const ROLES=["agent","team_lead","qa_evaluator","admin","system_admin"];
 const ROLE_LABELS={agent:"Agent",team_lead:"Team lead",qa_evaluator:"QA evaluator",admin:"Admin",system_admin:"System admin"};
 const PAGE_ACCESS={
-  results:     ["agent","team_lead","qa_evaluator","admin","system_admin"],
-  evaluate:    ["qa_evaluator","admin","system_admin"],
-  disputes:    ["agent","team_lead","qa_evaluator","admin","system_admin"],
-  analysis:    ["team_lead","qa_evaluator","admin","system_admin"],
-  insights:    ["team_lead","qa_evaluator","admin","system_admin"],
-  assignments: ["qa_evaluator","admin","system_admin"],
-  team:        ["qa_evaluator","admin","system_admin"],
-  scorecard:   ["qa_evaluator","admin","system_admin"],
-  permissions: ["system_admin"],
+  results:     ["agent","team_lead","qa_evaluator","admin","super_admin","system_owner","system_admin"],
+  evaluate:    ["qa_evaluator","admin","super_admin","system_owner","system_admin"],
+  disputes:    ["agent","team_lead","qa_evaluator","admin","super_admin","system_owner","system_admin"],
+  analysis:    ["team_lead","qa_evaluator","admin","super_admin","system_owner","system_admin"],
+  insights:    ["team_lead","qa_evaluator","admin","super_admin","system_owner","system_admin"],
+  assignments: ["qa_evaluator","admin","super_admin","system_owner","system_admin"],
+  team:        ["qa_evaluator","admin","super_admin","system_owner","system_admin"],
+  scorecard:   ["qa_evaluator","admin","super_admin","system_owner","system_admin"],
+  permissions: ["system_owner","system_admin"],
   setup: ROLES,   // always visible in the demo (it's the pre-app onboarding flow)
-  targets:     ["qa_evaluator","admin","system_admin"],
-  access:      ["admin","system_admin"],
-  roles:       ["system_admin"],
-  settings:    ["admin","system_admin"],
-  audit:       ["admin","system_admin"],
-  performance: ["qa_evaluator","admin","system_admin"],
+  targets:     ["qa_evaluator","admin","super_admin","system_owner","system_admin"],
+  access:      ["admin","super_admin","system_owner","system_admin"],
+  roles:       ["system_owner","system_admin"],
+  settings:    ["admin","super_admin","system_owner","system_admin"],
+  audit:       ["admin","super_admin","system_owner","system_admin"],
+  performance: ["qa_evaluator","admin","super_admin","system_owner","system_admin"],
 };
 const MORE_VIEWS = ["targets","access","roles","settings","audit","performance"];
+// Role catalog — the single source of truth for the Role Types page AND the
+// Permissions columns (mirrors the real app, where columns come from /api/roles).
+// [key, display, users, is_system]. viewer + the custom senior_qa hold no pages
+// by default, so they show an empty Permissions column ("new roles start with no powers").
+const ROLE_CATALOG=[
+  ["system_admin","System admin",1,true],["system_owner","System owner",0,true],
+  ["super_admin","Super admin",1,true],["admin","Admin",1,true],
+  ["qa_evaluator","QA evaluator",2,true],["team_lead","Team lead",2,true],
+  ["agent","Agent",2,true],["viewer","Viewer",0,true],["senior_qa","Senior QA",0,false],
+];
 let currentRole="system_admin";
 const SELF_AGENT="bob";        // the signed-in person when "View as: Agent"
 const TL_TEAM="Team Alpha";    // the signed-in person's team when "View as: Team lead"
@@ -1051,8 +1061,12 @@ function renderTeam(){
 function renderPermissions(){
   const order=[["Results","results"],["Evaluate","evaluate"],["Disputes","disputes"],["Analysis","analysis"],
     ["Insights","insights"],["Assignments","assignments"],["Team","team"],["Scorecards","scorecard"],["Permissions","permissions"]];
+  // Columns come from the role catalog (system_admin pinned first), like the real app.
+  const cols=['system_admin',...ROLE_CATALOG.map(r=>r[0]).filter(k=>k!=='system_admin')];
+  const label=k=>{const r=ROLE_CATALOG.find(x=>x[0]===k);return r?r[1]:k;};
+  document.getElementById('permHeadRow').innerHTML='<th>Page</th>'+cols.map(k=>`<th class="role">${label(k)}</th>`).join('');
   document.getElementById('permRows').innerHTML=order.map(([lbl,pg])=>`
-    <tr><td class="pg">${lbl}</td>${ROLES.map(r=>{const ok=PAGE_ACCESS[pg].includes(r);
+    <tr><td class="pg">${lbl}</td>${cols.map(r=>{const ok=PAGE_ACCESS[pg].includes(r);
       return `<td class="cell">${ok?'<span class="yes">✓</span>':'<span class="no">·</span>'}</td>`;}).join('')}</tr>`).join('');
 }
 
@@ -1093,12 +1107,7 @@ function renderAccess(){
       <td style="color:#94a3b8">${g}</td></tr>`).join('');
 }
 function renderRoles(){
-  // [key, display, users, is_system]
-  const rows=[["system_admin","System Admin",1,true],["system_owner","System Owner",0,true],
-    ["super_admin","Super Admin",1,true],["admin","Admin",1,true],["qa_evaluator","QA Evaluator",2,true],
-    ["team_lead","Team Lead",2,true],["agent","Agent",2,true],["viewer","Viewer",0,true],
-    ["senior_qa","Senior QA",0,false]];
-  document.getElementById('roleRows').innerHTML=rows.map(([k,d,u,sys])=>`
+  document.getElementById('roleRows').innerHTML=ROLE_CATALOG.map(([k,d,u,sys])=>`
     <tr><td style="color:#e2e8f0;font-weight:600">${d}</td>
       <td><code style="color:#7dd3fc;font-size:12px">${k}</code></td>
       <td class="tnum" style="color:#cbd5e1">${u}</td>
