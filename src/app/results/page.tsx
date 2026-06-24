@@ -8,6 +8,7 @@ import { DATE_PRESETS, getPresetRange, type DatePreset } from '@/lib/dates'
 import { scoreColor, formatDate, cn } from '@/lib/utils'
 import { InlineLoading } from '@/components/Loading'
 import { TicketLink } from '@/components/TicketLink'
+import { EDIT_ROLES } from '@/types'
 
 interface Evaluation {
   id: string; agent_email: string; team_lead_email: string | null; ticket_number: string
@@ -122,7 +123,7 @@ export default function ResultsPage() {
     load()
   }
   // Role-based UI gating (mirrors the server guards).
-  const canEdit = ['qa_evaluator', 'system_admin'].includes(role)          // edit / re-score
+  const canEdit = (EDIT_ROLES as string[]).includes(role)                  // edit / re-score
   const canCoach = ['team_lead', 'qa_evaluator', 'admin', 'super_admin', 'system_owner', 'system_admin'].includes(role) // coach: any role above agent
   const isQaStaff = ['qa_evaluator', 'admin', 'super_admin', 'system_owner', 'system_admin'].includes(role)             // create new evaluations
   const canExport = role !== '' && role !== 'agent' && role !== 'viewer'   // bulk export: not for agents

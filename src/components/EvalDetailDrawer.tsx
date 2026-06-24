@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { scoreColor, formatDate, cn } from '@/lib/utils'
 import { InlineLoading } from '@/components/Loading'
 import { TicketLink } from '@/components/TicketLink'
+import { EDIT_ROLES } from '@/types'
 
 interface Props {
   evaluationId: string
@@ -15,8 +16,6 @@ interface Props {
   onDeleted?: () => void
 }
 
-// Editing is reserved for QA evaluators + system_admin (mirrors the canEdit guard).
-const EDIT_ROLES = ['qa_evaluator', 'system_admin']
 // Coaching is for any role above the agent (mirrors the canCoach guard).
 const COACH_ROLES = ['team_lead', 'qa_evaluator', 'admin', 'super_admin', 'system_owner', 'system_admin']
 
@@ -64,7 +63,7 @@ export function EvalDetailDrawer({ evaluationId, role, userEmail, onClose, onEdi
     } finally { setAcking(false) }
   }
 
-  const canEdit = !!role && EDIT_ROLES.includes(role)
+  const canEdit = !!role && (EDIT_ROLES as string[]).includes(role)
   const canCoach = !!role && COACH_ROLES.includes(role)
   // The agent (own eval) or their team lead may raise a dispute — but only if one
   // doesn't already exist (a dispute can be raised once per evaluation, ever).
