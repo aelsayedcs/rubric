@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { normEmail } from '@/lib/utils'
-import { isAllowedEmail, ALLOWED_EMAIL_DOMAIN } from '@/lib/config'
+import { getAppConfig, isAllowedEmail } from '@/lib/app-config'
 
 // POST /api/register — public self-signup (email + password).
 // Creates an auth user (auto-confirmed) and grants the baseline 'agent' role for
@@ -11,9 +11,10 @@ export async function POST(req: NextRequest) {
   const { email, password } = await req.json()
   const e = normEmail(email)
 
-  if (!isAllowedEmail(e)) {
+  const { allowedEmailDomain } = await getAppConfig()
+  if (!isAllowedEmail(e, allowedEmailDomain)) {
     return NextResponse.json(
-      { error: `Use your @${ALLOWED_EMAIL_DOMAIN} email address.` },
+      { error: `Use your @${allowedEmailDomain} email address.` },
       { status: 400 },
     )
   }

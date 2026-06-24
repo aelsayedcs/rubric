@@ -159,13 +159,18 @@ The app runs with only the three **Supabase** keys set — everything else has s
 
 ## First-run setup
 
-After deploying with a fresh database:
+Once your Supabase env vars are set, just open **`/setup`** — a guided wizard walks you through it:
 
-1. **Create your admin account.** Sign up in the app (matching `NEXT_PUBLIC_ALLOWED_EMAIL_DOMAIN`
-   if set), or create the user in Supabase → Authentication.
-2. **Grant yourself admin.** Edit the bootstrap block at the bottom of `supabase/setup.sql`
-   (replace `you@example.com` with your email) and run it once to become `super_admin`.
-3. **Build your structure in-app** (no SQL needed):
+1. **Connect** — confirms your Supabase connection (with a live check).
+2. **Database** — links you to the SQL editor to run `supabase/setup.sql`, then verifies the tables.
+3. **Branding** — company name, login domain, ticket links, timezone (saved to the database).
+4. **Admin** — creates your administrator account.
+
+The wizard locks itself once an admin exists. A step-by-step **[`/setup/guide`](src/app/setup/guide)** page
+explains where to find each Supabase value. (Prefer SQL? The bottom of `supabase/setup.sql` has a
+manual admin-bootstrap block.)
+
+Then **build your structure in-app** (no SQL needed):
    - **Team** (`/team`) — add your agents and team leads (replace the sample team).
    - **Scorecards** (`/admin/scorecards`) — edit or replace the sample scorecard; add attributes,
      criteria, weights, critical items and per-channel tags, then **Publish**.

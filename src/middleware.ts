@@ -27,6 +27,8 @@ export async function middleware(request: NextRequest) {
   const isPublic =
     p.startsWith('/login') ||
     p.startsWith('/set-password') ||
+    p.startsWith('/setup') ||          // first-run setup wizard (locks itself once an admin exists)
+    p.startsWith('/api/setup') ||
     p.startsWith('/api/register') ||   // public self-signup — must run without auth
     p.startsWith('/api/health') ||
     p.startsWith('/api/cron')          // scheduled jobs (protected by CRON_SECRET)

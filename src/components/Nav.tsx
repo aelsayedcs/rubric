@@ -9,7 +9,7 @@ import { COMPANY_NAME } from '@/lib/config'
 import type { AppRole } from '@/types'
 
 interface NavItem { href: string; label: string }
-interface NavProps { email: string; role: AppRole | null; links: NavItem[] }
+interface NavProps { email: string; role: AppRole | null; links: NavItem[]; companyName?: string }
 
 // Pages tucked under the desktop "More" menu.
 const ADMIN_HREFS = new Set(['/admin/targets', '/admin/scorecards', '/team', '/admin/audit', '/admin/settings', '/performance', '/admin/access', '/permissions'])
@@ -20,7 +20,8 @@ const GROUPS: { title: string; hrefs: string[] }[] = [
   { title: 'Admin', hrefs: ['/admin/targets', '/admin/scorecards', '/team', '/admin/audit', '/admin/settings', '/admin/access', '/permissions'] },
 ]
 
-export function Nav({ email, role, links }: NavProps) {
+export function Nav({ email, role, links, companyName }: NavProps) {
+  const brand = companyName || COMPANY_NAME
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
@@ -72,8 +73,8 @@ export function Nav({ email, role, links }: NavProps) {
         {/* Logo */}
         <Link href="/results" className="flex items-center gap-2 md:mr-4 shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt={COMPANY_NAME} className="h-7 w-7 rounded-lg" style={{ boxShadow: '0 0 12px rgba(14,165,233,0.4)' }} />
-          <span className="font-bold text-white text-sm hidden sm:block tracking-tight">{COMPANY_NAME} <span className="text-sky-400">QA</span></span>
+          <img src="/logo.svg" alt={brand} className="h-7 w-7 rounded-lg" style={{ boxShadow: '0 0 12px rgba(14,165,233,0.4)' }} />
+          <span className="font-bold text-white text-sm hidden sm:block tracking-tight">{brand} <span className="text-sky-400">QA</span></span>
         </Link>
 
         {/* Desktop links (≥ md) */}
