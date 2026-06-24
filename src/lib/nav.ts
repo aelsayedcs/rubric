@@ -18,7 +18,7 @@ const FALLBACK: { href: string; label: string; roles: AppRole[] }[] = [
   { href: '/admin/audit',    label: 'Audit',       roles: ['qa_evaluator', 'admin', 'super_admin', 'system_owner', 'system_admin'] },
   { href: '/admin/settings', label: 'Settings',    roles: ['qa_evaluator', 'admin', 'super_admin', 'system_owner', 'system_admin'] },
   { href: '/performance',    label: 'Performance', roles: ['qa_evaluator', 'admin', 'super_admin', 'system_owner', 'system_admin'] },
-  { href: '/admin/access',   label: 'Access',      roles: ['qa_evaluator', 'admin', 'super_admin', 'system_owner', 'system_admin'] },
+  { href: '/admin/access',   label: 'Roles & Access', roles: ['qa_evaluator', 'admin', 'super_admin', 'system_owner', 'system_admin'] },
   { href: '/admin/roles',    label: 'Role Types',  roles: ['system_owner', 'system_admin'] },
   { href: '/permissions',    label: 'Permissions', roles: ['system_owner', 'system_admin'] },
 ]

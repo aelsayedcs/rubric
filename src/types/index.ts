@@ -16,6 +16,9 @@ export const QA_STAFF_ROLES: AppRole[] = ['qa_evaluator', 'admin', 'super_admin'
 // Editing the permissions matrix stays top-tier only (system_admin/system_owner),
 // which matches super_admin exactly.
 export const ADMIN_ROLES: AppRole[]    = ['qa_evaluator', 'admin', 'super_admin', 'system_owner', 'system_admin']
+// Editing/re-scoring an evaluation and deciding disputes directly (the QA review
+// surface) is narrower than ADMIN_ROLES: only QA evaluators and system_admin.
+export const EDIT_ROLES: AppRole[]     = ['qa_evaluator', 'system_admin']
 
 export interface Criterion {
   id: string

@@ -1,6 +1,6 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { AppRole } from '@/types'
-import { QA_STAFF_ROLES, ADMIN_ROLES } from '@/types'
+import { QA_STAFF_ROLES, ADMIN_ROLES, EDIT_ROLES } from '@/types'
 
 export interface CurrentUser {
   email: string
@@ -37,8 +37,9 @@ export function isAdmin(role: AppRole | null): boolean {
 
 // Editing / re-scoring an evaluation is intentionally narrower than the broad
 // QA-staff surface: only the QA evaluators and the top-tier system_admin may
-// change a scored evaluation (product decision 2026-06).
-export const EDIT_ROLES: AppRole[] = ['qa_evaluator', 'system_admin']
+// change a scored evaluation (product decision 2026-06). EDIT_ROLES lives in
+// @/types so client components can share the same gate.
+export { EDIT_ROLES }
 export function canEdit(role: AppRole | null): boolean {
   return !!role && EDIT_ROLES.includes(role)
 }
