@@ -286,5 +286,6 @@ Run `pnpm build` (or `npm run build`) before submitting — the build must pass.
 
 ## License
 
-See [`LICENSE`](LICENSE). _(AGPL-3.0 is recommended for an open-core project like this — add a
-`LICENSE` file with your chosen license before publishing.)_
+Licensed under **AGPL-3.0** — see [`LICENSE`](LICENSE). You can self-host and modify it freely;
+if you run a modified version as a network service, the AGPL requires you to make your source
+available to its users.
