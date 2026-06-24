@@ -22,8 +22,49 @@ the analytics, and score a ticket live. (The demo is a static mock — the real 
 
 ---
 
+## How it works
+
+**Architecture**
+
+```mermaid
+flowchart LR
+  U["QA evaluator · Team lead · Agent"]
+
+  subgraph app["Next.js 15 on Vercel"]
+    UI["Pages — Evaluate, Results, Analysis,<br/>Insights, Disputes, Assignments,<br/>Scorecards, Team, Admin"]
+    API["API routes<br/>(role-checked)"]
+    CRON["Cron — daily digest,<br/>target misses"]
+  end
+
+  subgraph supa["Supabase"]
+    AUTH["Auth"]
+    DB[("Postgres — public + qa schemas<br/>Row-Level Security")]
+  end
+
+  EXT["Email / Slack<br/>(optional)"]
+
+  U -->|sign in| AUTH
+  U --> UI --> API --> DB
+  CRON --> API
+  API -. notify .-> EXT
+```
+
+**Evaluation flow**
+
+```mermaid
+flowchart LR
+  T["Ticket / call / chat"] --> E["Evaluate vs.<br/>scorecard"] --> S["Score<br/>(any critical fail = 0)"]
+  S --> AN["Analytics &<br/>insights"]
+  S --> CO["Coaching →<br/>agent acknowledges"]
+  S --> DI["Dispute →<br/>team lead → QA"]
+  S --> DG["Daily digest<br/>(email / Slack)"]
+```
+
+---
+
 ## Table of contents
 - [Features](#features)
+- [How it works](#how-it-works)
 - [See it in action](#see-it-in-action)
 - [Tech stack](#tech-stack)
 - [Quick start (local)](#quick-start-local)
