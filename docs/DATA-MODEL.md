@@ -1,9 +1,9 @@
 # Rubric — Database & Data Model
 
-**Stack:** Supabase PostgreSQL · two schemas (`public`, `qa`) · migrations `001`–`020`.
+**Stack:** Supabase PostgreSQL · two schemas (`public`, `qa`) · migrations `001`–`021`.
 
 ## Overview
-- **`public`** — identity, access control, audit, config, and cross-cutting tables: `profiles`, `app_access`, `teams`, `agents`, `audit_log`, `app_config`, `tools`, `page_access`, `notifications`, `qa_targets`, `qa_groups`, `qa_group_members`, `qa_rotation_pool`, `qa_rotation_overrides`.
+- **`public`** — identity, access control, audit, config, and cross-cutting tables: `profiles`, `app_access`, `roles`, `teams`, `agents`, `audit_log`, `app_config`, `tools`, `page_access`, `notifications`, `qa_targets`, `qa_groups`, `qa_group_members`, `qa_rotation_pool`, `qa_rotation_overrides`.
 - **`qa`** — domain tables: `qa_scorecards`, `qa_criteria`, `qa_evaluations`, `qa_evaluation_responses`, `qa_disputes`, `qa_coaching`, plus the `qa.analysis()` RPC.
 
 Soft-deletes use `deleted_at` (evaluations) or `active`/`archived` flags. RLS is enabled on all tables; **API routes use the service-role key (bypasses RLS)** and enforce access in code.
@@ -26,7 +26,8 @@ Soft-deletes use `deleted_at` (evaluations) or `active`/`archived` flags. RLS is
 
 ## Core tables (public)
 - **profiles** `(id uuid PK→auth.users, email unique, full_name, status, created_at)` — identity.
-- **app_access** `(id, email, app app_key, role app_role, archived, granted_by, created_at; unique(email,app))` — per-app role grant. **Role source of truth** for `getCurrentUser()`.
+- **app_access** `(id, email, app app_key, role text, archived, granted_by, created_at; unique(email,app))` — per-app role grant. **Role source of truth** for `getCurrentUser()`. `role` is `text` since 021 (was `app_role` enum) so custom role keys can be assigned.
+- **roles** `(key PK, display_name, description, is_system, archived, sort_order, created_at)` — role-type catalog (021). Built-ins seeded `is_system=true`; managed at `/admin/roles` (create/edit by top tier; **delete is system_admin-only; the `system_admin` role can't be deleted**). Custom roles get page visibility via `page_access`; built-ins keep code-defined powers.
 - **teams** `(id, name unique, team_lead_email, archived, created_at)` — TL registry.
 - **agents** `(email PK, full_name, team_lead_email, team_id→teams, active, created_at)` — agent directory; `active=false` = archived. Emails normalized lowercase (011).
 - **audit_log** `(id bigint, app, actor_email, action, entity, entity_id, field, old_value, new_value, ts)` — append-only; RLS-enabled with **no policies** (service-role only).
@@ -78,6 +79,7 @@ Enabled on all tables. Identity/config tables: readable by any authenticated use
 | 018 | qa_groups, qa_group_members, qa_rotation_pool, qa_rotation_overrides |
 | 019 | scorecard builder: `qa_attributes`, scorecard `channels`, criterion `channels`, draft/publish versioning |
 | 020 | `qa_criteria.allow_na` (per-criterion N/A toggle) |
+| 021 | `roles` catalog (custom role types); `app_access.role` enum→text; `current_app_role()`→text |
 
 ## Key FK behaviors
 scorecard→evaluation `RESTRICT`; evaluation→responses `CASCADE`; criteria→responses `RESTRICT`; evaluation→disputes/coaching `SET NULL`; agents→qa_group_members `CASCADE`; qa_groups→members/overrides `CASCADE`.

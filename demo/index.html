@@ -303,6 +303,7 @@
     <div class="moremenu" id="moreMenu">
       <div class="mitem" data-v="targets">Targets</div>
       <div class="mitem" data-v="access">Access</div>
+      <div class="mitem" data-v="roles">Role Types</div>
       <div class="mitem" data-v="settings">Settings</div>
       <div class="mitem" data-v="audit">Audit</div>
       <div class="mitem" data-v="performance">Performance</div>
@@ -490,6 +491,23 @@
     </div>
   </section>
 
+  <!-- ROLE TYPES -->
+  <section class="view" id="roles">
+    <div class="head"><div><div class="title">Role Types</div><div class="sub">Create or delete role types. Assign them in <code style="color:#7dd3fc">Access</code>; control what each sees in <code style="color:#7dd3fc">Permissions</code>.</div></div></div>
+    <div class="panel">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)">
+        <input class="sel" style="width:160px" placeholder="senior_qa">
+        <input class="sel" style="flex:1;min-width:160px" placeholder="Senior QA">
+        <input class="sel" style="flex:1;min-width:160px" placeholder="description (optional)">
+        <button class="btn btn-primary" onclick="alert('Demo only — adds a row to the roles catalog. New roles start with no powers; grant page access in Permissions.')">Create role</button>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>Role</th><th>Key</th><th>Users</th><th>Type</th><th>Status</th></tr></thead>
+        <tbody id="roleRows"></tbody>
+      </table></div>
+    </div>
+  </section>
+
   <!-- SETTINGS -->
   <section class="view" id="settings">
     <div class="head"><div><div class="title">Settings</div><div class="sub">App configuration (the <code style="color:#7dd3fc">app_config</code> table). Edit and save.</div></div></div>
@@ -550,11 +568,12 @@ const PAGE_ACCESS={
   setup: ROLES,   // always visible in the demo (it's the pre-app onboarding flow)
   targets:     ["qa_evaluator","admin","system_admin"],
   access:      ["admin","system_admin"],
+  roles:       ["system_admin"],
   settings:    ["admin","system_admin"],
   audit:       ["admin","system_admin"],
   performance: ["qa_evaluator","admin","system_admin"],
 };
-const MORE_VIEWS = ["targets","access","settings","audit","performance"];
+const MORE_VIEWS = ["targets","access","roles","settings","audit","performance"];
 let currentRole="system_admin";
 const SELF_AGENT="bob";        // the signed-in person when "View as: Agent"
 const TL_TEAM="Team Alpha";    // the signed-in person's team when "View as: Team lead"
@@ -1073,6 +1092,19 @@ function renderAccess(){
     <tr><td style="color:#e2e8f0">${e}</td><td><span class="badge ${tint[r]||'b-disp'}">${r}</span></td>
       <td style="color:#94a3b8">${g}</td></tr>`).join('');
 }
+function renderRoles(){
+  // [key, display, users, is_system]
+  const rows=[["system_admin","System Admin",1,true],["system_owner","System Owner",0,true],
+    ["super_admin","Super Admin",1,true],["admin","Admin",1,true],["qa_evaluator","QA Evaluator",2,true],
+    ["team_lead","Team Lead",2,true],["agent","Agent",2,true],["viewer","Viewer",0,true],
+    ["senior_qa","Senior QA",0,false]];
+  document.getElementById('roleRows').innerHTML=rows.map(([k,d,u,sys])=>`
+    <tr><td style="color:#e2e8f0;font-weight:600">${d}</td>
+      <td><code style="color:#7dd3fc;font-size:12px">${k}</code></td>
+      <td class="tnum" style="color:#cbd5e1">${u}</td>
+      <td><span class="badge ${sys?'b-call':'b-chat'}">${sys?'Built-in':'Custom'}</span></td>
+      <td><span class="badge b-disp">active</span></td></tr>`).join('');
+}
 function renderSettings(){
   const rows=[["company_name","Acme Support"],["allowed_email_domain","acme.com"],["coaching_threshold","85"],
     ["scorecard_name","Sample QA Scorecard"],["digest_tz","UTC"],["rotation_anchor","2026-01-04"]];
@@ -1109,7 +1141,7 @@ renderRows(); renderAnalysis();
 bars('failed',[["Minimized dead air",28],["Correct grammar & spelling",22],["Followed the workflow",16],["Empathetic tone",11],["Confirmed resolution",8]],true);
 renderCoaching(); renderLeaderboard(); renderInsights(); renderDisputes(); renderAssignments();
 renderBuilder(); renderEvalForm(); renderTeam(); renderPermissions();
-renderTargets(); renderAccess(); renderSettings(); renderAudit(); renderPerformance(); applyRole();
+renderTargets(); renderAccess(); renderRoles(); renderSettings(); renderAudit(); renderPerformance(); applyRole();
 
 // ── Setup wizard mockup ──
 let wizStep=0;
