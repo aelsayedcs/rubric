@@ -290,6 +290,7 @@
     <div class="tab" data-v="evaluate">Evaluate</div>
     <div class="tab" data-v="team">Team</div>
     <div class="tab" data-v="permissions">Permissions</div>
+    <div class="tab" data-v="setup">⚙ Setup</div>
   </div>
   <select id="roleAs" class="roleas" aria-label="View the app as a role"></select>
   <div class="demo-pill"><span class="dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24"></span>Demo</div>
@@ -442,6 +443,12 @@
     </table></div></div>
   </section>
 
+  <!-- SETUP WIZARD (mockup) -->
+  <section class="view" id="setup">
+    <div class="head"><div><div class="title">First-run setup wizard</div><div class="sub">What a new self-hoster sees the first time they open the app. (Preview — buttons advance the steps.)</div></div></div>
+    <div class="panel" style="max-width:560px;margin:0 auto"><div id="wizard"></div></div>
+  </section>
+
 </div>
 
 <footer>
@@ -478,6 +485,7 @@ const PAGE_ACCESS={
   team:        ["qa_evaluator","admin","system_admin"],
   scorecard:   ["qa_evaluator","admin","system_admin"],
   permissions: ["system_admin"],
+  setup: ROLES,   // always visible in the demo (it's the pre-app onboarding flow)
 };
 let currentRole="system_admin";
 const SELF_AGENT="bob";        // the signed-in person when "View as: Agent"
@@ -972,6 +980,54 @@ renderRows(); renderAnalysis();
 bars('failed',[["Minimized dead air",28],["Correct grammar & spelling",22],["Followed the workflow",16],["Empathetic tone",11],["Confirmed resolution",8]],true);
 renderCoaching(); renderLeaderboard(); renderInsights(); renderDisputes(); renderAssignments();
 renderBuilder(); renderEvalForm(); renderTeam(); renderPermissions(); applyRole();
+
+// ── Setup wizard mockup ──
+let wizStep=0;
+const WIZ=['Connect','Database','Branding','Admin'];
+function wizGo(n){ wizStep=Math.max(0,Math.min(4,n)); renderWizard(); }
+function renderWizard(){
+  const stepper=WIZ.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;flex:1">
+      <div style="width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;flex:none;${i<=wizStep?'background:#0ea5e9;color:#fff':'background:rgba(255,255,255,.1);color:#94a3b8'}">${i+1}</div>
+      <span style="font-size:11px;font-weight:700;${i===wizStep?'color:#fff':'color:#64748b'}">${s}</span>
+      ${i<WIZ.length-1?`<div style="flex:1;height:1px;${i<wizStep?'background:rgba(14,165,233,.5)':'background:rgba(255,255,255,.1)'}"></div>`:''}
+    </div>`).join('');
+  let body;
+  if(wizStep===4){
+    body=`<div style="text-align:center;padding:20px 10px">
+      <div style="font-size:46px;margin-bottom:8px">🎉</div>
+      <h3 style="font-size:18px;font-weight:800;color:#fff;margin-bottom:6px">You're all set</h3>
+      <p style="color:#94a3b8;font-size:13px;margin-bottom:18px">Your admin account is ready — this lands you in the working app.</p>
+      <button class="btn btn-ghost" onclick="wizGo(0)">↺ Restart preview</button></div>`;
+  } else if(wizStep===0){
+    body=`<p style="color:#94a3b8;font-size:13px;margin-bottom:12px">Rubric connects to your own Supabase project. Set three environment variables, then redeploy:</p>
+      <div style="font-family:ui-monospace,monospace;font-size:12.5px;color:#cbd5e1;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:11px;padding:13px;line-height:1.9">
+        NEXT_PUBLIC_SUPABASE_URL<br>NEXT_PUBLIC_SUPABASE_ANON_KEY<br>SUPABASE_SERVICE_ROLE_KEY</div>
+      ${wizOk('Supabase connection detected')}
+      <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn-primary" onclick="wizGo(1)">Next →</button></div>`;
+  } else if(wizStep===1){
+    body=`<p style="color:#94a3b8;font-size:13px;margin-bottom:12px">Paste <code style="color:#7dd3fc">supabase/setup.sql</code> into your Supabase SQL editor and run it to create the tables + sample data.</p>
+      <button class="btn btn-ghost" style="margin-bottom:6px">Open Supabase SQL editor ↗</button>
+      ${wizOk('Database initialized')}
+      <div style="display:flex;justify-content:space-between;margin-top:16px"><button class="btn btn-ghost" onclick="wizGo(0)">← Back</button><button class="btn btn-primary" onclick="wizGo(2)">Next →</button></div>`;
+  } else if(wizStep===2){
+    body=`<p style="color:#94a3b8;font-size:13px;margin-bottom:12px">Your branding — saved to the database, editable later in Settings.</p>
+      ${wizField('Company / brand name','Acme Support')}
+      ${wizField('Allowed sign-in email domain (blank = any)','acme.com')}
+      ${wizField('Ticket link base URL (optional)','https://acme.freshdesk.com/a/tickets/')}
+      ${wizField('Timezone (IANA)','UTC')}
+      <div style="display:flex;justify-content:space-between;margin-top:16px"><button class="btn btn-ghost" onclick="wizGo(1)">← Back</button><button class="btn btn-primary" onclick="wizGo(3)">Save & continue →</button></div>`;
+  } else {
+    body=`<p style="color:#94a3b8;font-size:13px;margin-bottom:12px">Create your administrator account — the account that manages everything.</p>
+      ${wizField('Your email','you@acme.com')}
+      ${wizField('Password (min 8 characters)','••••••••')}
+      <div style="display:flex;justify-content:space-between;margin-top:16px"><button class="btn btn-ghost" onclick="wizGo(2)">← Back</button><button class="btn btn-primary" onclick="wizGo(4)">Create admin & finish →</button></div>`;
+  }
+  document.getElementById('wizard').innerHTML=`<div style="padding:20px">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:20px">${stepper}</div>${body}</div>`;
+}
+function wizField(label,ph){return `<div style="margin-bottom:11px"><label style="display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#64748b;font-weight:600;margin-bottom:5px">${label}</label><input class="sel" style="width:100%;padding:9px 11px" placeholder="${ph}"></div>`;}
+function wizOk(t){return `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#34d399;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:11px;padding:10px 13px;margin-top:12px">✅ ${t}</div>`;}
+renderWizard();
 </script>
 </body>
 </html>
