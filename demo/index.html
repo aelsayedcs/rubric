@@ -217,8 +217,33 @@
   footer a{color:var(--sky-2);text-decoration:none;font-weight:600}
   footer a:hover{text-decoration:underline}
   .banner{background:linear-gradient(90deg,rgba(14,165,233,.08),rgba(129,140,248,.06));border-bottom:1px solid var(--line);
-          padding:9px 20px;text-align:center;font-size:12.5px;color:var(--muted)}
+          padding:9px 20px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
   .banner b{color:#e2e8f0} .banner a{color:#38bdf8;text-decoration:none;font-weight:600}
+  .banner-cta{display:flex;gap:8px;flex:none}
+  .banner .btn{padding:6px 12px;font-size:12px}
+  .banner .btn-primary{color:#fff} .banner .btn-ghost{color:#cbd5e1}
+
+  /* agent profile / dispute thread / coaching modal */
+  .profile-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+  .pk{padding:12px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+  .pk .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600}
+  .pk .val{font-size:20px;font-weight:800;color:#fff;margin-top:3px;font-variant-numeric:tabular-nums}
+  .thr{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .thr:last-child{border-bottom:none}
+  .thr .tdot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:none}
+  .thr .twho{font-size:12.5px;font-weight:700;color:#e2e8f0}
+  .thr .twhen{font-size:11px;color:var(--faint);font-weight:500}
+  .thr .tbody{font-size:12.5px;color:#cbd5e1;margin-top:3px}
+  .modal-scrim{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);display:none;place-items:center;z-index:60;padding:20px}
+  .modal-scrim.open{display:grid}
+  .modal{width:min(460px,96vw);background:#0d1424;border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.6);overflow:hidden}
+  .modal-h{padding:15px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .modal-h h3{font-size:15px;font-weight:700;color:#fff}
+  .modal-b{padding:18px}
+  .modal-b label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600;margin:12px 0 5px}
+  .modal-b label:first-child{margin-top:0}
+  .modal-b textarea{width:100%;min-height:58px;padding:10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;font-family:inherit;font-size:13px;resize:vertical}
+  .modal-b textarea:focus{outline:none;border-color:rgba(14,165,233,.5)}
 
   /* drawer */
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:.25s;z-index:50}
@@ -269,7 +294,13 @@
   <div class="avatar">QA</div>
 </nav>
 
-<div class="banner">Interactive preview with <b>synthetic data</b> and no backend — every page below is real in the app. Self-host from the <a href="../">repository</a> →</div>
+<div class="banner">
+  <span>Interactive preview with <b>synthetic data</b> — every page here is real in the app.</span>
+  <span class="banner-cta">
+    <a class="btn btn-ghost" href="https://github.com/aelsayedcs/qa-system" target="_blank" rel="noopener">★ View on GitHub</a>
+    <a class="btn btn-primary" href="https://vercel.com/new/clone?repository-url=https://github.com/aelsayedcs/qa-system" target="_blank" rel="noopener">Deploy your own →</a>
+  </span>
+</div>
 
 <div class="page">
 
@@ -418,6 +449,7 @@
 
 <div class="scrim" id="scrim" onclick="closeDrawer()"></div>
 <aside class="drawer" id="drawer" aria-hidden="true"></aside>
+<div class="modal-scrim" id="coachScrim" onclick="if(event.target===this)closeCoach()"><div class="modal" id="coachModal"></div></div>
 
 <script>
 "use strict";
@@ -486,6 +518,15 @@ const EVALS = [
   {ag:"alice", t:"48190", ch:"Call",    d:"Jun 19", s:97,  tags:[]},
   {ag:"frank", t:"48175", ch:"Chat",    d:"Jun 18", s:90,  tags:["coached"]},
 ];
+
+const AGENT_STATS={
+  alice:{avg:95.4,evals:32,crit:0,coached:38,trend:[92,94,93,96,95,97,95,96]},
+  erin: {avg:92.6,evals:28,crit:1,coached:30,trend:[89,91,90,93,92,94,93,92]},
+  frank:{avg:87.2,evals:24,crit:1,coached:46,trend:[80,82,85,84,88,87,90,88]},
+  dave: {avg:83.1,evals:26,crit:2,coached:52,trend:[74,77,79,82,80,85,84,86]},
+  bob:  {avg:79.3,evals:22,crit:2,coached:50,trend:[70,72,75,74,79,78,80,83]},
+  carol:{avg:74.8,evals:19,crit:3,coached:58,trend:[78,75,72,70,74,73,76,72]},
+};
 
 function breakdown(ev){
   const out=[]; let seed = parseInt(ev.t,10);
@@ -562,12 +603,81 @@ function openDrawer(idx){
       body+=`<div class="cr"><span class="crl">${it.l}${it.crit?' <span class="ctag" style="margin-left:4px">CRITICAL</span>':''}</span><span class="res ${cls}">${lbl}</span></div>`;
     });
   });
-  body+=`</div>`;
-  const dr=document.getElementById('drawer'); dr.innerHTML=body; dr.classList.add('open'); dr.setAttribute('aria-hidden','false');
-  document.getElementById('scrim').classList.add('open');
+  body+=`<button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:16px" onclick="openCoach('${a.n}')">Coach ${a.n.split(' ')[0]} →</button></div>`;
+  showDrawer(body);
 }
+function showDrawer(html){const dr=document.getElementById('drawer');dr.innerHTML=html;dr.classList.add('open');dr.setAttribute('aria-hidden','false');document.getElementById('scrim').classList.add('open');}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').setAttribute('aria-hidden','true');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeCoach();}});
+
+// Sparkline (inline SVG)
+function sparkline(data){
+  const W=380,H=64,pad=6,max=Math.max(...data),min=Math.min(...data),rng=(max-min)||1;
+  const x=i=>pad+i*((W-pad*2)/(data.length-1)), y=val=>H-pad-((val-min)/rng)*(H-pad*2);
+  const pts=data.map((val,i)=>[x(i),y(val)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=line+` L ${x(data.length-1).toFixed(1)} ${H-pad} L ${pad} ${H-pad} Z`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="height:64px" role="img" aria-label="trend">
+    <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0ea5e9" stop-opacity=".3"/><stop offset="1" stop-color="#0ea5e9" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#sg)"/><path d="${line}" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="#38bdf8"/></svg>`;
+}
+// Agent profile drawer
+function openAgent(key){
+  const a=AGENTS[key], st=AGENT_STATS[key], recent=EVALS.filter(e=>e.ag===key).slice(0,5);
+  let body=`<div class="dr-h"><div style="display:flex;align-items:center;gap:11px">
+      <span class="ag-av" style="background:${a.c};width:36px;height:36px;font-size:13px">${initials(a.n)}</span>
+      <div><div style="font-size:17px;font-weight:800;color:#fff">${a.n}</div><div style="font-size:12px;color:var(--faint)">${a.team} · ${a.tl}</div></div>
+    </div><div class="x" onclick="closeDrawer()">✕</div></div>
+    <div class="dr-body">
+      <div class="profile-kpis">
+        <div class="pk"><div class="lbl">Avg score</div><div class="val" style="color:${scoreColor(st.avg)}">${st.avg}%</div></div>
+        <div class="pk"><div class="lbl">Evaluations</div><div class="val">${st.evals}</div></div>
+        <div class="pk"><div class="lbl">Critical</div><div class="val">${st.crit}</div></div>
+        <div class="pk"><div class="lbl">Coached</div><div class="val">${st.coached}%</div></div>
+      </div>
+      <div class="sec-lbl">Score trend · 8 weeks</div>${sparkline(st.trend)}
+      <div class="sec-lbl">Recent evaluations</div>`;
+  recent.forEach(e=>{ body+=`<div class="cr"><span class="crl">#${e.t} · ${e.ch} · ${e.d}</span><span class="res" style="background:rgba(255,255,255,.06);color:${scoreColor(e.s)}">${e.s}%</span></div>`; });
+  body+=`<button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:16px" onclick="openCoach('${a.n}')">Coach ${a.n.split(' ')[0]} →</button></div>`;
+  showDrawer(body);
+}
+// Dispute thread drawer
+function openDispute(idx){
+  const x=DISPUTES[idx], a=AGENTS[x.ag], st=DST[x.st];
+  const steps=[{who:a.n+' · agent', when:x.sub, c:'#60a5fa', body:'Requested a re-review — feels the score doesn’t reflect the interaction.'}];
+  if(['approved_tl','pending_qa','approved_qa','rejected_qa'].includes(x.st)) steps.push({who:'Team lead', when:x.upd, c:'#c084fc', body:'Reviewed and escalated to QA for a final decision.'});
+  if(x.st==='pending_tl') steps.push({who:'Team lead', when:'—', c:'#fbbf24', pending:true, body:'Awaiting team-lead review.'});
+  if(x.st==='approved_qa') steps.push({who:'QA evaluator', when:x.upd, c:'#34d399', body:'Approved — evaluation re-scored.'});
+  if(x.st==='rejected_qa') steps.push({who:'QA evaluator', when:x.upd, c:'#f87171', body:'Rejected — original score upheld.'});
+  if(x.st==='pending_qa') steps.push({who:'QA evaluator', when:'—', c:'#fbbf24', pending:true, body:'Awaiting QA decision.'});
+  let body=`<div class="dr-h"><div><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#64748b;font-weight:600">Dispute</div>
+      <div style="font-size:18px;font-weight:800;color:#fff;margin-top:2px">Ticket #${x.t}</div></div>
+      <div class="x" onclick="closeDrawer()">✕</div></div>
+    <div class="dr-body"><div class="meta-grid">
+      <div><div class="k">Agent</div><div class="v">${a.n}</div></div>
+      <div><div class="k">Status</div><div class="v"><span class="badge ${st[0]}">${st[1]}</span></div></div>
+      <div><div class="k">Submitted</div><div class="v">${x.sub}</div></div>
+      <div><div class="k">Last update</div><div class="v">${x.upd}</div></div>
+    </div><div class="sec-lbl">Decision thread</div>`;
+  steps.forEach(s=>{ body+=`<div class="thr"><span class="tdot" style="background:${s.c}${s.pending?';opacity:.5':''}"></span>
+      <div><div class="twho">${s.who} <span class="twhen">· ${s.when}</span></div><div class="tbody"${s.pending?' style="opacity:.65"':''}>${s.body}</div></div></div>`; });
+  body+=`</div>`;
+  showDrawer(body);
+}
+// Coaching modal
+function openCoach(name){
+  document.getElementById('coachModal').innerHTML=`
+    <div class="modal-h"><h3>Coach ${name}</h3><div class="x" onclick="closeCoach()">✕</div></div>
+    <div class="modal-b">
+      <label>Strengths</label><textarea placeholder="What did they do well?"></textarea>
+      <label>Areas for improvement</label><textarea placeholder="What to work on next"></textarea>
+      <label>Action plan</label><textarea placeholder="Concrete next steps"></textarea>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px" onclick="closeCoach();alert('Demo only — the real app saves the coaching log, emails the agent, and asks them to acknowledge it.')">Send coaching →</button>
+    </div>`;
+  document.getElementById('coachScrim').classList.add('open');
+}
+function closeCoach(){document.getElementById('coachScrim').classList.remove('open');}
 
 // ── Analysis ──
 function renderTrend(){
@@ -601,7 +711,7 @@ function renderCoaching(){
 function renderLeaderboard(){
   const d=[["alice",95.4,32],["erin",92.6,28],["frank",87.2,24],["dave",83.1,26],["bob",79.3,22],["carol",74.8,19]];
   document.getElementById('leaderboard').innerHTML=d.map(([k,s,n],i)=>{const a=AGENTS[k];return `
-    <div class="lb"><span class="rk">${i+1}</span><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>
+    <div class="lb" style="cursor:pointer" onclick="openAgent('${k}')"><span class="rk">${i+1}</span><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>
       <div class="nm">${a.n}<div class="n2">${n} evaluations</div></div>
       <span class="score tnum" style="color:${scoreColor(s)}">${s}%</span></div>`;}).join('');
 }
@@ -637,8 +747,8 @@ function renderDisputes(){
     <div class="kpi" style="cursor:default"><div class="lbl">Pending</div><div class="val tnum">2</div></div>
     <div class="kpi" style="cursor:default"><div class="lbl">Approved</div><div class="val tnum">2</div></div>
     <div class="kpi" style="cursor:default"><div class="lbl">Rejected</div><div class="val tnum">1</div></div>`;
-  document.getElementById('dispRows').innerHTML=DISPUTES.map(x=>{const a=AGENTS[x.ag],st=DST[x.st];return `
-    <tr><td><div class="agent-cell"><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>${a.n}</div></td>
+  document.getElementById('dispRows').innerHTML=DISPUTES.map((x,i)=>{const a=AGENTS[x.ag],st=DST[x.st];return `
+    <tr class="clk" onclick="openDispute(${i})"><td><div class="agent-cell"><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>${a.n}</div></td>
       <td><span class="ticket">#${x.t}</span></td><td><span class="badge ${st[0]}">${st[1]}</span></td>
       <td class="tnum" style="color:#94a3b8">${x.sub}</td><td class="tnum" style="color:#94a3b8">${x.upd}</td></tr>`;}).join('');
 }
@@ -725,7 +835,7 @@ function recompute(){
 // ── Team ──
 function renderTeam(){
   document.getElementById('teamRows').innerHTML=Object.entries(AGENTS).map(([k,a])=>`
-    <tr><td><div class="agent-cell"><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>${a.n}</div></td>
+    <tr class="clk" onclick="openAgent('${k}')"><td><div class="agent-cell"><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>${a.n}</div></td>
       <td style="color:#94a3b8">${k}@example.com</td><td>${a.team}</td><td style="color:#94a3b8">${a.tl}</td>
       <td><span class="badge b-coached"><span class="dot" style="background:#34d399"></span>active</span></td></tr>`).join('');
 }
