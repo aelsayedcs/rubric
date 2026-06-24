@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────
 
 /** Brand name shown in the UI header, page titles and outgoing emails. */
-export const COMPANY_NAME = process.env.NEXT_PUBLIC_COMPANY_NAME?.trim() || 'QA System'
+export const COMPANY_NAME = process.env.NEXT_PUBLIC_COMPANY_NAME?.trim() || 'Rubric'
 
 /**
  * Restrict sign-in / self-registration to this email domain (e.g. "acme.com").

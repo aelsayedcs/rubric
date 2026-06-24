@@ -120,7 +120,7 @@ export async function GET(req: NextRequest) {
     const html = detailHtml(`Your QA evaluations — ${dateLabel}`, `You had <b>${s.n}</b> evaluation${s.n > 1 ? 's' : ''} today · avg <b>${s.avg}%</b>${s.crit ? ` · ${s.crit} with a critical error` : ''}.`, cards)
     const lines = rows.slice(0, 12).map(r => `• <${appUrl}/results?eval=${r.id}|#${r.ticket_number}> (${r.channel}) · ${r.score}%${r.total_critical_errors > 0 ? ' ⚠️' : ''}${r.coached ? ' · coached' : ''}`).join('\n')
     const more = rows.length > 12 ? `\n…and ${rows.length - 12} more` : ''
-    const text = `*Your QA evaluations — ${dateLabel}*\n*${s.n}* today · avg *${s.avg}%*${s.crit ? ` · ${s.crit} with a critical error` : ''}\n\n${lines}${more}\n\n<${appUrl}/results|View full detail in QA System →>`
+    const text = `*Your QA evaluations — ${dateLabel}*\n*${s.n}* today · avg *${s.avg}%*${s.crit ? ` · ${s.crit} with a critical error` : ''}\n\n${lines}${more}\n\n<${appUrl}/results|View full detail in ${COMPANY_NAME} →>`
     jobs.push(sendEmail({ to: agent, subject: `Your QA evaluations — ${dateLabel} (${s.n})`, html }))
     jobs.push(slackDM(agent, text))
     sent++

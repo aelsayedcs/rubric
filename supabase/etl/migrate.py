@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-QA System V1 — one-time data migration (Google Sheet xlsx → Supabase Postgres).
+Rubric — one-time data migration (Google Sheet xlsx → Supabase Postgres).
 
 Stages (run in order, or use --all):
   --identity   AccessControl → app_access/profiles ; Agent_teamLeader_Settings → agents/teams

@@ -1,5 +1,5 @@
 -- ============================================================
--- QA System — full setup (paste into Supabase SQL Editor → Run)
+-- Rubric — full setup (paste into Supabase SQL Editor → Run)
 -- Runs every migration in order. Idempotent: safe to re-run.
 -- After running, bootstrap your first admin at the bottom of this file.
 -- ============================================================

@@ -1,6 +1,6 @@
-# QA System — Database & Data Model
+# Rubric — Database & Data Model
 
-**Stack:** Supabase PostgreSQL · two schemas (`public`, `qa`) · migrations `001`–`018`.
+**Stack:** Supabase PostgreSQL · two schemas (`public`, `qa`) · migrations `001`–`020`.
 
 ## Overview
 - **`public`** — identity, access control, audit, config, and cross-cutting tables: `profiles`, `app_access`, `teams`, `agents`, `audit_log`, `app_config`, `tools`, `page_access`, `notifications`, `qa_targets`, `qa_groups`, `qa_group_members`, `qa_rotation_pool`, `qa_rotation_overrides`.
@@ -43,7 +43,7 @@ Soft-deletes use `deleted_at` (evaluations) or `active`/`archived` flags. RLS is
 
 ## Domain tables (qa)
 - **qa_scorecards** `(id, name, version, channel, active, created_at; unique(name,version); partial unique index → only one active)`.
-- **qa_criteria** `(id, scorecard_id→qa_scorecards CASCADE, section, label, weight int, is_critical bool, sort_order, archived)`. `is_critical=true` → any fail zeroes the score. Live scorecard = "Sample QA Scorecard" with sections Greeting & Closing, Handling Skills, Chat/Call Etiquette & Format, Process Documentation, Critical Mistakes.
+- **qa_criteria** `(id, scorecard_id→qa_scorecards CASCADE, section, label, weight int, is_critical bool, sort_order, archived)`. `is_critical=true` → any fail zeroes the score. The seeded sample = "Sample QA Scorecard" with sections Communication, Problem Solving, Live Channel Etiquette, Process & Compliance, Closing, Critical Mistakes (fully editable in-app).
 - **qa_evaluations** `(id, scorecard_id→ RESTRICT, agent_email, evaluator_email, team_lead_email, ticket_number, customer_email, channel, eval_date, solved_date, score numeric(5,2), total_errors, total_critical_errors, status, acknowledged, disputed, coached, coached_by, coached_at, notes, areas_for_improvement, source, created_at, deleted_at)`. Rich indexing incl. partial indexes on `deleted_at IS NULL` and a dedupe index `(agent_email, ticket_number, eval_date)`.
 - **qa_evaluation_responses** `(id, evaluation_id→ CASCADE, criterion_id→ RESTRICT, result; unique(evaluation_id,criterion_id))` — per-criterion pass/fail/na.
 - **qa_disputes** `(id, evaluation_id→ SET NULL, agent_email, ticket_number, comment, submitted_by, status qa_dispute_status, response, tl_decision/tl_comment/tl_email/tl_action_at, qa_decision/qa_comment/qa_email/qa_action_at, last_updated_by, last_updated_at, created_at)` — agent→TL→QA workflow.

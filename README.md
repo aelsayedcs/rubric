@@ -1,4 +1,4 @@
-# QA System — open-source CX / support quality scorecards
+# Rubric — open-source CX / support quality scorecards
 
 A self-hostable **quality-assurance platform for customer-support teams**. QA evaluators score
 support tickets, calls and chats against a fully customizable scorecard; the results power
@@ -15,7 +15,7 @@ screens — **no code changes required**.
 
 ## 🔎 Live demo
 
-**Try it instantly — no install, no login:** **https://aelsayedcs.github.io/qa-system/demo/**
+**Try it instantly — no install, no login:** **https://aelsayedcs.github.io/rubric/demo/**
 
 An interactive preview with synthetic data: browse evaluations, open a scorecard breakdown, explore
 the analytics, and score a ticket live. (The demo is a static mock — the real app is what you self-host.)
@@ -64,7 +64,7 @@ the analytics, and score a ticket live. (The demo is a static mock — the real 
 
 ## See it in action
 
-The fastest way to see the UI is the **[live demo](https://aelsayedcs.github.io/qa-system/demo/)** —
+The fastest way to see the UI is the **[live demo](https://aelsayedcs.github.io/rubric/demo/)** —
 it shows the evaluation list with KPI cards, a scorecard breakdown drawer, the analytics dashboard,
 the scorecard builder, and the live-scoring form, all on sample data.
 
@@ -88,7 +88,7 @@ works too), and a free [Supabase](https://supabase.com) project.
 
 ```bash
 # 1. Clone
-git clone <your-fork-url> qa-system && cd qa-system
+git clone https://github.com/aelsayedcs/rubric && cd rubric
 
 # 2. Install dependencies
 pnpm install        # or: npm install
