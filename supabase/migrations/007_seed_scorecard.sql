@@ -17,28 +17,24 @@ insert into qa.qa_criteria (scorecard_id, section, label, weight, is_critical, s
 select sc.id, c.section, c.label, c.weight, c.is_critical, c.sort_order
 from sc, (values
   -- section, label, weight, is_critical, sort_order
-  ('Greeting & Closing',            'Using the correct greeting script',                                   5,  false,  1),
-  ('Greeting & Closing',            'Using Survey script',                                                 15, false,  2),
-  ('Greeting & Closing',            'Call Closure and offering further assistance',                        5,  false,  3),
-  ('Handling Skills',               'Showing Willingness to Help, empathy when required',                  15, false,  4),
-  ('Handling Skills',               'Proper communication and not using local slang',                      6,  false,  5),
-  ('Handling Skills',               'Asking probing / effective questions (Concentration)',                0,  true,   6),
-  ('Handling Skills',               'Enabled the customer to speak without interruption',                  5,  false,  7),
-  ('Handling Skills',               'Good tone of voice',                                                  5,  false,  8),
-  ('Chat/Call Etiquette & Format',  'Following hold protocol',                                             5,  false,  9),
-  ('Chat/Call Etiquette & Format',  'Avoiding dead air',                                                   4,  false, 10),
-  ('Chat/Call Etiquette & Format',  'Proper message format / thorough responses',                          5,  false, 11),
-  ('Chat/Call Etiquette & Format',  'Correct grammar, structure, spelling and punctuation',                10, false, 12),
-  ('Chat/Call Etiquette & Format',  'Use templates correctly / customize when needed',                     5,  false, 13),
-  ('Chat/Call Etiquette & Format',  'Match the customer''s level of technical sophistication',             5,  false, 14),
-  ('Chat/Call Etiquette & Format',  'Effectively use canned replies',                                      5,  false, 15),
-  ('Process Documentation',         'Added the proper relevant information in the case',                    5,  false, 16),
-  ('Critical Mistakes',             'Be patient, courteous, respectful and professional throughout',       0,  true,  17),
-  ('Critical Mistakes',             'Create a ticket or add a summary to the pending ticket',              0,  true,  18),
-  ('Critical Mistakes',             'Closed the ticket following the correct contact reason',              0,  true,  19),
-  ('Critical Mistakes',             'Assigned to the correct team with full and accurate data',            0,  true,  20),
-  ('Critical Mistakes',             'Replied to all inquiries with accurate info & policy / transferred to survey', 0, true, 21),
-  ('Critical Mistakes',             'Compliance regulations considered (customer / business impact)',      0,  true,  22)
+  ('Communication',          'Professional, friendly greeting',                  7,  false,  1),
+  ('Communication',          'Clear and concise language',                       8,  false,  2),
+  ('Communication',          'Positive, empathetic tone',                        10, false,  3),
+  ('Problem Solving',        'Correctly identified the customer''s issue',       10, false,  4),
+  ('Problem Solving',        'Accurate and complete solution',                   15, false,  5),
+  ('Problem Solving',        'Proactively prevented follow-up contacts',         5,  false,  6),
+  ('Live Channel Etiquette', 'Followed hold / wait-time protocol',               5,  false,  7),
+  ('Live Channel Etiquette', 'Minimized dead air / response gaps',               5,  false,  8),
+  ('Live Channel Etiquette', 'Correct grammar, spelling and punctuation',        8,  false,  9),
+  ('Process & Compliance',   'Followed the correct workflow',                    8,  false, 10),
+  ('Process & Compliance',   'Logged a clear, accurate summary',                 7,  false, 11),
+  ('Process & Compliance',   'Verified customer identity',                       0,  true,  12),
+  ('Process & Compliance',   'Followed data-privacy policy',                     0,  true,  13),
+  ('Closing',                'Confirmed the issue was resolved',                 7,  false, 14),
+  ('Closing',                'Offered further help and closed politely',         5,  false, 15),
+  ('Critical Mistakes',      'Gave accurate information (no misinformation)',     0,  true,  16),
+  ('Critical Mistakes',      'Stayed professional and respectful throughout',    0,  true,  17),
+  ('Critical Mistakes',      'Routed / escalated to the correct team',           0,  true,  18)
 ) as c(section, label, weight, is_critical, sort_order)
 where not exists (
   select 1 from qa.qa_criteria x where x.scorecard_id = sc.id and x.sort_order = c.sort_order

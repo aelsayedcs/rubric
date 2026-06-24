@@ -7,8 +7,7 @@
 <meta name="description" content="Interactive demo (sample data) of the open-source CX / support quality scorecard platform." />
 <style>
   :root{
-    --bg-base:#080c14; --bg-surface:#0d1424; --bg-elevated:#111827;
-    --txt:#e2e8f0; --muted:#94a3b8; --faint:#64748b;
+    --bg-base:#080c14; --txt:#e2e8f0; --muted:#94a3b8; --faint:#64748b;
     --sky:#0ea5e9; --sky-2:#38bdf8; --indigo:#818cf8;
     --emerald:#34d399; --amber:#fbbf24; --red:#f87171;
     --blue:#60a5fa; --purple:#c084fc; --pink:#f472b6;
@@ -31,37 +30,36 @@
   ::selection{background:rgba(14,165,233,.3)}
   .tnum{font-variant-numeric:tabular-nums}
 
-  .glass{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:1rem;backdrop-filter:blur(20px)}
-  .glass-strong{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:1rem}
-
-  /* ── Nav ── */
   nav{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:6px;
-      padding:0 20px;background:rgba(8,12,20,.82);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:9px;margin-right:12px;font-weight:700;font-size:14px;letter-spacing:-.01em}
+      padding:0 20px;background:rgba(8,12,20,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:9px;margin-right:10px;font-weight:700;font-size:14px;letter-spacing:-.01em;flex:none}
   .logo{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
         background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:0 0 14px rgba(14,165,233,.5)}
   .logo svg{width:16px;height:16px}
   .brand .accent{color:var(--sky-2)}
   .tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
-  .tab{padding:7px 13px;border-radius:9px;font-size:13px;font-weight:500;color:var(--muted);
+  .tab{padding:7px 12px;border-radius:9px;font-size:13px;font-weight:500;color:var(--muted);
        cursor:pointer;white-space:nowrap;border:1px solid transparent;transition:.15s}
   .tab:hover{color:#e2e8f0;background:rgba(255,255,255,.05)}
   .tab.active{color:var(--sky-2);background:rgba(14,165,233,.12);border-color:rgba(14,165,233,.25)}
   .demo-pill{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--amber);
-             background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);padding:5px 11px;border-radius:99px;white-space:nowrap}
+             background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);padding:5px 11px;border-radius:99px;white-space:nowrap;flex:none}
   .avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#334155,#1e293b);
-          display:grid;place-items:center;font-size:12px;font-weight:700;color:#cbd5e1;border:1px solid rgba(255,255,255,.1);margin-left:8px}
+          display:grid;place-items:center;font-size:12px;font-weight:700;color:#cbd5e1;border:1px solid rgba(255,255,255,.1);margin-left:8px;flex:none}
+  .roleas{font-size:12px;font-weight:600;padding:6px 10px;border-radius:9px;flex:none;cursor:pointer;
+          background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:#38bdf8}
+  .roleas:focus{outline:none}
+  .roleas option{background:#111827;color:#e2e8f0}
 
   .page{max-width:1280px;margin:0 auto;padding:26px 20px 64px}
-  .view{display:none;animation:fade .45s ease both}
+  .view{display:none;animation:fade .4s ease both}
   .view.active{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
   .head{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
   .title{font-size:21px;font-weight:800;letter-spacing:-.02em;color:#fff}
   .sub{font-size:13px;color:var(--faint);margin-top:2px}
-  .gradient-text{background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 
   .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:11px;font-size:13px;font-weight:600;
        cursor:pointer;border:1px solid transparent;transition:.18s;white-space:nowrap}
@@ -70,7 +68,6 @@
   .btn-ghost{background:rgba(255,255,255,.05);color:var(--muted);border-color:rgba(255,255,255,.1)}
   .btn-ghost:hover{background:rgba(255,255,255,.1);color:#fff}
 
-  /* ── KPI cards ── */
   .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:22px}
   @media(min-width:640px){.kpis{grid-template-columns:repeat(3,1fr)}}
   @media(min-width:1024px){.kpis{grid-template-columns:repeat(6,1fr)}}
@@ -86,31 +83,28 @@
   .kpi .delta{font-size:11px;margin-top:4px;font-weight:600}
   .up{color:var(--emerald)} .down{color:var(--red)}
 
-  /* ── Panels ── */
   .panel{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:16px;overflow:hidden}
   .panel-h{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--line)}
   .panel-h h3{font-size:14px;font-weight:700;color:#fff}
   .panel-h .meta{font-size:12px;color:var(--faint)}
 
-  /* ── Filter bar ── */
   .filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
   .sel{font-size:12px;padding:7px 11px;border-radius:9px;background:rgba(255,255,255,.05);
        border:1px solid rgba(255,255,255,.1);color:#cbd5e1;cursor:pointer}
   .sel:focus{outline:none;border-color:rgba(14,165,233,.4)}
+  input.sel{cursor:text}
 
-  /* ── Table ── */
   .tw{overflow-x:auto}
-  table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;min-width:680px}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;min-width:560px}
   thead th{text-align:left;padding:11px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
            color:rgba(148,163,184,.75);font-weight:600;background:rgba(255,255,255,.03);border-bottom:1px solid var(--line)}
   tbody td{padding:12px 16px;color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,.04)}
-  tbody tr{cursor:pointer;transition:background .15s}
-  tbody tr:hover{background:rgba(255,255,255,.045)}
+  tbody tr.clk{cursor:pointer;transition:background .15s}
+  tbody tr.clk:hover{background:rgba(255,255,255,.045)}
   tbody tr:last-child td{border-bottom:none}
   .agent-cell{display:flex;align-items:center;gap:9px}
   .ag-av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;color:#0b1120;flex:none}
-  .mono{font-variant-numeric:tabular-nums}
-  .ticket{color:var(--sky-2);font-weight:600}
+  .ticket{color:var(--sky-2);font-weight:600;font-variant-numeric:tabular-nums}
 
   .badge{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
   .b-chat{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
@@ -121,36 +115,53 @@
   .b-crit{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
   .b-disp{background:rgba(148,163,184,.13);color:var(--muted);border:1px solid rgba(148,163,184,.25)}
   .score{font-weight:800;font-variant-numeric:tabular-nums}
-
   .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
 
-  /* ── Two col ── */
   .grid2{display:grid;grid-template-columns:1fr;gap:16px}
-  @media(min-width:900px){.grid2{grid-template-columns:1.5fr 1fr}}
+  @media(min-width:900px){.grid2{grid-template-columns:1.6fr 1fr}}
   .grid2b{display:grid;grid-template-columns:1fr;gap:16px}
   @media(min-width:900px){.grid2b{grid-template-columns:1fr 1fr}}
 
-  /* ── Chart ── */
-  .chart{padding:18px}
-  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
-  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .statstrip{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+  @media(min-width:720px){.statstrip{grid-template-columns:repeat(4,1fr)}}
+  .stat{padding:14px 16px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+  .stat .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600}
+  .stat .val{font-size:23px;font-weight:800;color:#fff;margin-top:5px;font-variant-numeric:tabular-nums}
 
-  /* ── Bars ── */
+  .chart{padding:18px}
   .barrow{display:flex;align-items:center;gap:12px;padding:9px 0}
-  .barrow .nm{width:140px;font-size:12.5px;color:#cbd5e1;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .barrow .nm{width:150px;font-size:12.5px;color:#cbd5e1;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .bartrack{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
   .barfill{height:100%;border-radius:99px;background:linear-gradient(90deg,#0ea5e9,#38bdf8)}
   .barrow .pct{width:42px;text-align:right;font-size:12px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;flex:none}
   .fail .barfill{background:linear-gradient(90deg,#ef4444,#f87171)}
 
-  /* ── Leaderboard ── */
   .lb{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid rgba(255,255,255,.04)}
   .lb:last-child{border-bottom:none}
   .lb .rk{width:22px;font-size:12px;font-weight:800;color:var(--faint);text-align:center}
   .lb .nm{flex:1;font-size:13px;color:#e2e8f0}
   .lb .n2{font-size:11px;color:var(--faint)}
 
-  /* ── Scorecard builder ── */
+  /* coaching impact */
+  .ci{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+  .ci:last-child{border-bottom:none}
+  .ci .nm{flex:1}
+  .ci .ba{color:var(--faint);font-variant-numeric:tabular-nums}
+  .ci .ar{color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+  .ci .up{color:var(--emerald);font-weight:800;font-variant-numeric:tabular-nums}
+
+  /* insights */
+  .insight{display:flex;gap:14px;padding:16px 18px;border-bottom:1px solid var(--line)}
+  .insight:last-child{border-bottom:none}
+  .sev{width:4px;border-radius:99px;flex:none}
+  .sev-high{background:#f87171} .sev-med{background:#fbbf24} .sev-pos{background:#34d399} .sev-info{background:#38bdf8}
+  .insight .it{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px}
+  .insight .ib{font-size:13px;color:#94a3b8}
+  .sevtag{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:6px;margin-left:8px;vertical-align:middle}
+  .st-high{background:rgba(239,68,68,.15);color:#f87171} .st-med{background:rgba(245,158,11,.13);color:#fbbf24}
+  .st-pos{background:rgba(16,185,129,.13);color:#34d399} .st-info{background:rgba(14,165,233,.13);color:#38bdf8}
+
+  /* scorecard builder */
   .attr{border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-bottom:12px;background:rgba(255,255,255,.02)}
   .attr-h{display:flex;align-items:center;gap:10px;padding:13px 16px;background:rgba(255,255,255,.03)}
   .attr-h .an{font-size:14px;font-weight:700;color:#fff}
@@ -164,21 +175,52 @@
   .wtag{font-size:11px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.05);border:1px solid var(--line);padding:2px 8px;border-radius:7px;font-variant-numeric:tabular-nums}
   .ctag{font-size:10px;font-weight:800;letter-spacing:.04em;color:var(--red);background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.3);padding:2px 7px;border-radius:6px}
 
-  /* ── Evaluate ── */
+  /* evaluate */
+  .evfields{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 16px 6px}
+  .fld label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600;margin-bottom:5px}
+  .fld .sel{width:100%;padding:9px 11px}
   .pill{display:inline-flex;align-items:center;justify-content:center;padding:6px 13px;border-radius:9px;font-size:12px;font-weight:700;
         cursor:pointer;border:1px solid;transition:.15s;user-select:none}
   .p-idle{background:rgba(255,255,255,.05);color:var(--muted);border-color:rgba(255,255,255,.1)}
   .p-idle:hover{background:rgba(255,255,255,.1)}
-  .p-pass{background:rgba(16,185,129,.18);color:var(--emerald);border-color:rgba(16,185,129,.45);box-shadow:0 0 12px rgba(16,185,129,.2)}
-  .p-fail{background:rgba(239,68,68,.18);color:var(--red);border-color:rgba(239,68,68,.45);box-shadow:0 0 12px rgba(239,68,68,.2)}
+  .p-pass{background:rgba(16,185,129,.18);color:var(--emerald);border-color:rgba(16,185,129,.45)}
+  .p-fail{background:rgba(239,68,68,.18);color:var(--red);border-color:rgba(239,68,68,.45)}
   .p-na{background:rgba(148,163,184,.4);color:#fff;border-color:rgba(203,213,225,.7)}
-  .ev-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.04)}
+  .ev-row{display:flex;align-items:center;gap:14px;padding:11px 16px;border-top:1px solid rgba(255,255,255,.04)}
   .ev-row .el{flex:1;font-size:13px;color:#cbd5e1}
   .ev-pills{display:flex;gap:6px;flex:none}
   .scorebox{position:sticky;top:72px}
   .bigscore{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+  .locked{opacity:.45}
 
-  /* ── Drawer ── */
+  /* assignments */
+  .grp{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.02);margin-bottom:14px}
+  .grp-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:13px 16px;background:rgba(255,255,255,.03)}
+  .grp-h .gn{font-size:14px;font-weight:700;color:#fff}
+  .src{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:6px}
+  .src-auto{background:rgba(148,163,184,.13);color:var(--muted)} .src-over{background:rgba(14,165,233,.14);color:var(--sky-2)}
+  .prog{flex:1;min-width:120px;height:7px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+  .prog>div{height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:99px}
+  .achips{display:flex;flex-wrap:wrap;gap:7px;padding:13px 16px}
+  .achip{display:inline-flex;align-items:center;gap:7px;font-size:12px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:#cbd5e1}
+  .achip.done{color:var(--emerald);border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.08)}
+
+  /* permission matrix */
+  .matrix{min-width:680px}
+  .matrix th.role{text-align:center}
+  .matrix td.pg{color:#e2e8f0;font-weight:600;white-space:nowrap}
+  .matrix td.cell{text-align:center}
+  .yes{color:var(--emerald);font-weight:800}
+  .no{color:#334155}
+
+  footer{border-top:1px solid var(--line);padding:22px 20px;text-align:center;color:var(--faint);font-size:12.5px}
+  footer a{color:var(--sky-2);text-decoration:none;font-weight:600}
+  footer a:hover{text-decoration:underline}
+  .banner{background:linear-gradient(90deg,rgba(14,165,233,.08),rgba(129,140,248,.06));border-bottom:1px solid var(--line);
+          padding:9px 20px;text-align:center;font-size:12.5px;color:var(--muted)}
+  .banner b{color:#e2e8f0} .banner a{color:#38bdf8;text-decoration:none;font-weight:600}
+
+  /* drawer */
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:.25s;z-index:50}
   .scrim.open{opacity:1;pointer-events:auto}
   .drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,92vw);background:rgba(10,14,24,.98);
@@ -201,13 +243,6 @@
   .r-pass{background:rgba(16,185,129,.16);color:var(--emerald)}
   .r-fail{background:rgba(239,68,68,.16);color:var(--red)}
   .r-na{background:rgba(148,163,184,.18);color:#cbd5e1}
-
-  footer{border-top:1px solid var(--line);padding:22px 20px;text-align:center;color:var(--faint);font-size:12.5px}
-  footer a{color:var(--sky-2);text-decoration:none;font-weight:600}
-  footer a:hover{text-decoration:underline}
-  .banner{background:linear-gradient(90deg,rgba(14,165,233,.08),rgba(129,140,248,.06));border-bottom:1px solid var(--line);
-          padding:9px 20px;text-align:center;font-size:12.5px;color:var(--muted)}
-  .banner b{color:#e2e8f0}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -221,27 +256,29 @@
   <div class="tabs" id="tabs">
     <div class="tab active" data-v="results">Results</div>
     <div class="tab" data-v="analysis">Analysis</div>
+    <div class="tab" data-v="insights">Insights</div>
+    <div class="tab" data-v="disputes">Disputes</div>
+    <div class="tab" data-v="assignments">Assignments</div>
     <div class="tab" data-v="scorecard">Scorecard</div>
     <div class="tab" data-v="evaluate">Evaluate</div>
+    <div class="tab" data-v="team">Team</div>
+    <div class="tab" data-v="permissions">Permissions</div>
   </div>
-  <div class="demo-pill"><span class="dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24"></span>Demo · sample data</div>
+  <select id="roleAs" class="roleas" aria-label="View the app as a role"></select>
+  <div class="demo-pill"><span class="dot" style="background:#fbbf24;box-shadow:0 0 6px #fbbf24"></span>Demo</div>
   <div class="avatar">QA</div>
 </nav>
 
-<div class="banner">This is an interactive preview with <b>synthetic data</b> and no backend. Self-host the real app from the <a href="../" style="color:#38bdf8;text-decoration:none;font-weight:600">repository</a> →</div>
+<div class="banner">Interactive preview with <b>synthetic data</b> and no backend — every page below is real in the app. Self-host from the <a href="../">repository</a> →</div>
 
 <div class="page">
 
-  <!-- ════════ RESULTS ════════ -->
+  <!-- RESULTS -->
   <section class="view active" id="results">
     <div class="head">
-      <div>
-        <div class="title">Evaluations</div>
-        <div class="sub">Rolling 30 days · all channels · click a card to filter, a row for the full breakdown</div>
-      </div>
+      <div><div class="title">Evaluations</div><div class="sub">Rolling 30 days · click a card to filter, a row for the full breakdown</div></div>
       <button class="btn btn-primary" onclick="go('evaluate')">+ New evaluation</button>
     </div>
-
     <div class="kpis" id="kpis">
       <div class="kpi" data-f="all"><div class="lbl">Tickets Done</div><div class="val tnum">128</div><div class="delta up">▲ 12 vs prev</div></div>
       <div class="kpi" data-f="all"><div class="lbl">Avg Score</div><div class="val tnum">86.4%</div><div class="delta up">▲ 2.1 pts</div></div>
@@ -250,93 +287,126 @@
       <div class="kpi" data-f="needs"><div class="lbl">Needs Coaching</div><div class="val tnum">19</div><div class="delta down">below 85%</div></div>
       <div class="kpi" data-f="disp"><div class="lbl">Disputed</div><div class="val tnum">5</div><div class="delta">2 pending</div></div>
     </div>
-
     <div class="filters">
-      <select class="sel" id="fAgent"><option value="">All agents</option></select>
+      <select class="sel" id="fAgent"></select>
       <select class="sel" id="fChannel"><option value="">All channels</option><option>Chat</option><option>Call</option><option>Tickets</option></select>
       <select class="sel" id="fStatus"><option value="">Any status</option><option value="coached">Coached</option><option value="needs">Needs coaching</option><option value="crit">Critical</option><option value="disp">Disputed</option></select>
       <button class="btn btn-ghost" onclick="resetFilters()">Reset</button>
       <button class="btn btn-ghost" style="margin-left:auto" onclick="alert('In the real app this exports a CSV with one row per evaluation plus a column per criterion.')">Export CSV</button>
     </div>
-
-    <div class="panel">
-      <div class="tw">
-        <table>
-          <thead><tr><th>Agent</th><th>Ticket</th><th>Channel</th><th>Date</th><th>Score</th><th>Status</th></tr></thead>
-          <tbody id="rows"></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="panel"><div class="tw"><table>
+      <thead><tr><th>Agent</th><th>Ticket</th><th>Channel</th><th>Date</th><th>Score</th><th>Status</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div></div>
   </section>
 
-  <!-- ════════ ANALYSIS ════════ -->
+  <!-- ANALYSIS -->
   <section class="view" id="analysis">
     <div class="head">
       <div><div class="title">Analysis</div><div class="sub">Company target 85% · last 8 weeks</div></div>
       <div class="filters" style="margin:0">
         <select class="sel"><option>Last 8 weeks</option><option>This quarter</option><option>This month</option></select>
-        <select class="sel"><option>All channels</option></select>
+        <select class="sel"><option>All channels</option><option>Chat</option><option>Call</option><option>Tickets</option></select>
       </div>
     </div>
-
+    <div class="statstrip">
+      <div class="stat"><div class="lbl">Avg score</div><div class="val">86.4%</div></div>
+      <div class="stat"><div class="lbl">Critical rate</div><div class="val">5.5%</div></div>
+      <div class="stat"><div class="lbl">Coached</div><div class="val">32%</div></div>
+      <div class="stat"><div class="lbl">Open disputes</div><div class="val">2</div></div>
+    </div>
     <div class="grid2">
-      <div class="panel">
-        <div class="panel-h"><h3>Score trend vs target</h3><span class="meta">avg 86.4%</span></div>
-        <div class="chart" id="trend"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-h"><h3>By channel</h3></div>
-        <div style="padding:16px 18px" id="byChannel"></div>
-      </div>
+      <div class="panel"><div class="panel-h"><h3>Score trend vs target</h3><span class="meta">avg 86.4%</span></div><div class="chart" id="trend"></div></div>
+      <div class="panel"><div class="panel-h"><h3>By channel</h3></div><div style="padding:16px 18px" id="byChannel"></div></div>
     </div>
-
     <div class="grid2b" style="margin-top:16px">
-      <div class="panel">
-        <div class="panel-h"><h3>Most-failed criteria</h3><span class="meta">% of fails</span></div>
-        <div style="padding:14px 18px" id="failed"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-h"><h3>Agent leaderboard</h3><span class="meta">avg score</span></div>
-        <div id="leaderboard"></div>
-      </div>
+      <div class="panel"><div class="panel-h"><h3>Most-failed criteria</h3><span class="meta">% of fails</span></div><div style="padding:14px 18px" id="failed"></div></div>
+      <div class="panel"><div class="panel-h"><h3>Coaching impact</h3><span class="meta">avg +9 pts</span></div><div id="coaching"></div></div>
     </div>
+    <div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Agent leaderboard</h3><span class="meta">avg score</span></div><div id="leaderboard"></div></div>
   </section>
 
-  <!-- ════════ SCORECARD ════════ -->
+  <!-- INSIGHTS -->
+  <section class="view" id="insights">
+    <div class="head"><div><div class="title">Insights</div><div class="sub">Ranked, period-over-period recommendations</div></div></div>
+    <div class="panel" id="insightList"></div>
+  </section>
+
+  <!-- DISPUTES -->
+  <section class="view" id="disputes">
+    <div class="head"><div><div class="title">Disputes</div><div class="sub">Agent → team lead → QA workflow</div></div></div>
+    <div class="kpis" style="grid-template-columns:repeat(2,1fr);max-width:560px" id="dispKpis"></div>
+    <div class="panel"><div class="tw"><table>
+      <thead><tr><th>Agent</th><th>Ticket</th><th>Status</th><th>Submitted</th><th>Last update</th></tr></thead>
+      <tbody id="dispRows"></tbody>
+    </table></div></div>
+  </section>
+
+  <!-- ASSIGNMENTS -->
+  <section class="view" id="assignments">
+    <div class="head">
+      <div><div class="title">Weekly QA rotation</div><div class="sub">Groups rotate evaluators automatically each week, with manual overrides</div></div>
+      <div class="filters" style="margin:0">
+        <button class="btn btn-ghost">◀</button>
+        <span class="sel" style="cursor:default">This week · Sun 22 – Sat 28 Jun</span>
+        <button class="btn btn-ghost">▶</button>
+      </div>
+    </div>
+    <div id="groups"></div>
+    <div class="panel" style="margin-top:4px"><div class="panel-h"><h3>Rotation pool</h3><span class="meta">QAs in the weekly cycle</span></div>
+      <div class="achips" id="pool"></div></div>
+  </section>
+
+  <!-- SCORECARD -->
   <section class="view" id="scorecard">
     <div class="head">
       <div><div class="title">Sample QA Scorecard <span style="font-size:12px;color:var(--faint);font-weight:600">· v1 · active</span></div>
         <div class="sub">Dynamic & versioned — edit on a draft, publish, and past evaluations stay pinned to their version</div></div>
       <div class="filters" style="margin:0">
-        <button class="btn btn-ghost" onclick="alert('Demo only — in the real app this clones the active version into an editable draft.')">Create draft</button>
+        <button class="btn btn-ghost" onclick="alert('Demo only — clones the active version into an editable draft.')">Create draft</button>
         <button class="btn btn-primary" onclick="alert('Demo only — Publish activates a draft and pins prior evaluations to their version.')">Publish</button>
       </div>
     </div>
     <div id="builder"></div>
   </section>
 
-  <!-- ════════ EVALUATE ════════ -->
+  <!-- EVALUATE -->
   <section class="view" id="evaluate">
-    <div class="head">
-      <div><div class="title">New evaluation</div><div class="sub">Toggle the pills — the score updates live. Any <b style="color:var(--red)">critical</b> fail zeroes the score.</div></div>
-    </div>
+    <div class="head"><div><div class="title">New evaluation</div><div class="sub">Fill the ticket info, toggle the pills — the score updates live. Switch the channel to see items auto-mark N/A.</div></div></div>
     <div class="grid2">
       <div class="panel" id="evalForm"></div>
-      <div>
-        <div class="panel scorebox">
-          <div class="panel-h"><h3>Live score</h3></div>
-          <div style="padding:26px 20px;text-align:center">
-            <div class="bigscore" id="liveScore">100<span style="font-size:24px;color:var(--faint)">%</span></div>
-            <div id="scoreNote" style="font-size:12px;color:var(--emerald);font-weight:700;margin-top:8px">On track</div>
-            <div style="display:flex;gap:18px;justify-content:center;margin-top:20px">
-              <div><div class="lbl" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600">Errors</div><div class="tnum" id="errCount" style="font-size:22px;font-weight:800;color:#fff;margin-top:3px">0</div></div>
-              <div><div class="lbl" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600">Critical</div><div class="tnum" id="critCount" style="font-size:22px;font-weight:800;color:#fff;margin-top:3px">0</div></div>
-            </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:22px" onclick="alert('Demo only — the real app saves the evaluation, recomputes the score server-side, and clears the form so you can score the next ticket.')">Submit evaluation</button>
+      <div><div class="panel scorebox">
+        <div class="panel-h"><h3>Live score</h3></div>
+        <div style="padding:26px 20px;text-align:center">
+          <div class="bigscore" id="liveScore">100<span style="font-size:24px;color:var(--faint)">%</span></div>
+          <div id="scoreNote" style="font-size:12px;color:var(--emerald);font-weight:700;margin-top:8px">On track</div>
+          <div style="display:flex;gap:18px;justify-content:center;margin-top:20px">
+            <div><div class="lbl" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600">Errors</div><div class="tnum" id="errCount" style="font-size:22px;font-weight:800;color:#fff;margin-top:3px">0</div></div>
+            <div><div class="lbl" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600">Critical</div><div class="tnum" id="critCount" style="font-size:22px;font-weight:800;color:#fff;margin-top:3px">0</div></div>
           </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:22px" onclick="alert('Demo only — the real app saves the evaluation, recomputes the score server-side, and clears the form for the next ticket.')">Submit evaluation</button>
         </div>
-      </div>
+      </div></div>
     </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="view" id="team">
+    <div class="head"><div><div class="title">Team</div><div class="sub">Agents and team leads — fully managed in-app (add, edit, archive, reassign)</div></div>
+      <button class="btn btn-primary" onclick="alert('Demo only — adds an agent to the directory.')">+ Add agent</button></div>
+    <div class="panel"><div class="tw"><table>
+      <thead><tr><th>Agent</th><th>Email</th><th>Team</th><th>Team lead</th><th>Status</th></tr></thead>
+      <tbody id="teamRows"></tbody>
+    </table></div></div>
+  </section>
+
+  <!-- PERMISSIONS -->
+  <section class="view" id="permissions">
+    <div class="head"><div><div class="title">Permissions</div><div class="sub">Editable page → role matrix. The app also enforces these checks server-side on every API route.</div></div></div>
+    <div class="panel"><div class="tw"><table class="matrix">
+      <thead><tr><th>Page</th><th class="role">Agent</th><th class="role">Team lead</th><th class="role">QA evaluator</th><th class="role">Admin</th><th class="role">System admin</th></tr></thead>
+      <tbody id="permRows"></tbody>
+    </table></div></div>
   </section>
 
 </div>
@@ -346,65 +416,87 @@
   <span style="color:#475569">Demo data is fictional. Self-host with your own Supabase project in minutes.</span>
 </footer>
 
-<!-- Drawer -->
 <div class="scrim" id="scrim" onclick="closeDrawer()"></div>
 <aside class="drawer" id="drawer" aria-hidden="true"></aside>
 
 <script>
 "use strict";
 const AGENTS = {
-  alice:{n:"Alice Example",c:"#34d399"}, bob:{n:"Bob Example",c:"#60a5fa"},
-  carol:{n:"Carol Example",c:"#f472b6"}, dave:{n:"Dave Example",c:"#fbbf24"},
-  erin:{n:"Erin Example",c:"#c084fc"}, frank:{n:"Frank Example",c:"#38bdf8"}
+  alice:{n:"Alice Example",c:"#34d399",team:"Team Alpha",tl:"lead.alpha@example.com"},
+  bob:{n:"Bob Example",c:"#60a5fa",team:"Team Alpha",tl:"lead.alpha@example.com"},
+  carol:{n:"Carol Example",c:"#f472b6",team:"Team Alpha",tl:"lead.alpha@example.com"},
+  dave:{n:"Dave Example",c:"#fbbf24",team:"Team Beta",tl:"lead.beta@example.com"},
+  erin:{n:"Erin Example",c:"#c084fc",team:"Team Beta",tl:"lead.beta@example.com"},
+  frank:{n:"Frank Example",c:"#38bdf8",team:"Team Beta",tl:"lead.beta@example.com"}
 };
 const initials = n => n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
 
+// Roles + page access (single source of truth for the matrix AND the "View as" switcher)
+const ROLES=["agent","team_lead","qa_evaluator","admin","system_admin"];
+const ROLE_LABELS={agent:"Agent",team_lead:"Team lead",qa_evaluator:"QA evaluator",admin:"Admin",system_admin:"System admin"};
+const PAGE_ACCESS={
+  results:     ["agent","team_lead","qa_evaluator","admin","system_admin"],
+  evaluate:    ["qa_evaluator","admin","system_admin"],
+  disputes:    ["agent","team_lead","qa_evaluator","admin","system_admin"],
+  analysis:    ["team_lead","qa_evaluator","admin","system_admin"],
+  insights:    ["team_lead","qa_evaluator","admin","system_admin"],
+  assignments: ["qa_evaluator","admin","system_admin"],
+  team:        ["qa_evaluator","admin","system_admin"],
+  scorecard:   ["qa_evaluator","admin","system_admin"],
+  permissions: ["system_admin"],
+};
+let currentRole="system_admin";
+function applyRole(){
+  document.querySelectorAll('.tab').forEach(t=>{ t.style.display=PAGE_ACCESS[t.dataset.v].includes(currentRole)?'':'none'; });
+  const active=document.querySelector('.view.active').id;
+  if(!PAGE_ACCESS[active].includes(currentRole)) go('results');
+}
+
 // Sample scorecard (mirrors supabase/migrations/007_seed_scorecard.sql)
 const SCORECARD = [
-  {sec:"Greeting & Closing", chans:["Chat","Call","Tickets"], items:[
-    {l:"Using the correct greeting script", w:5}, {l:"Using survey script", w:15}, {l:"Closure & offering further assistance", w:5}]},
-  {sec:"Handling Skills", chans:["Chat","Call","Tickets"], items:[
-    {l:"Willingness to help / empathy", w:15}, {l:"Proper communication, no local slang", w:6},
-    {l:"Asking effective probing questions", w:0, crit:true}, {l:"Good tone of voice", w:5}]},
-  {sec:"Chat/Call Etiquette & Format", chans:["Chat","Call"], items:[
-    {l:"Following hold protocol", w:5}, {l:"Avoiding dead air", w:4},
-    {l:"Correct grammar, spelling & punctuation", w:10}, {l:"Effective use of canned replies", w:5}]},
-  {sec:"Process Documentation", chans:["Chat","Call","Tickets"], items:[
-    {l:"Added relevant information in the case", w:5}]},
+  {sec:"Communication", chans:["Chat","Call","Tickets"], items:[
+    {l:"Professional, friendly greeting", w:7}, {l:"Clear and concise language", w:8}, {l:"Positive, empathetic tone", w:10}]},
+  {sec:"Problem Solving", chans:["Chat","Call","Tickets"], items:[
+    {l:"Correctly identified the customer's issue", w:10}, {l:"Accurate and complete solution", w:15}, {l:"Proactively prevented follow-up contacts", w:5}]},
+  {sec:"Live Channel Etiquette", chans:["Chat","Call"], items:[
+    {l:"Followed hold / wait-time protocol", w:5}, {l:"Minimized dead air / response gaps", w:5},
+    {l:"Correct grammar, spelling & punctuation", w:8}]},
+  {sec:"Process & Compliance", chans:["Chat","Call","Tickets"], items:[
+    {l:"Followed the correct workflow", w:8}, {l:"Logged a clear, accurate summary", w:7},
+    {l:"Verified customer identity", w:0, crit:true}, {l:"Followed data-privacy policy", w:0, crit:true}]},
+  {sec:"Closing", chans:["Chat","Call","Tickets"], items:[
+    {l:"Confirmed the issue was resolved", w:7}, {l:"Offered further help & closed politely", w:5}]},
   {sec:"Critical Mistakes", chans:["Chat","Call","Tickets"], items:[
-    {l:"Patient, courteous & professional throughout", w:0, crit:true},
-    {l:"Created a ticket / added summary", w:0, crit:true},
-    {l:"Closed with the correct contact reason", w:0, crit:true},
-    {l:"Replied with accurate info & policy", w:0, crit:true}]},
+    {l:"Gave accurate information (no misinformation)", w:0, crit:true},
+    {l:"Stayed professional & respectful throughout", w:0, crit:true},
+    {l:"Routed / escalated to the correct team", w:0, crit:true}]},
 ];
 
-// Sample evaluations
 const EVALS = [
   {ag:"alice", t:"48261", ch:"Tickets", d:"Jun 23", s:100, tags:[], note:"Flawless handling, proactive follow-up."},
   {ag:"erin",  t:"48244", ch:"Call",    d:"Jun 23", s:91,  tags:[]},
   {ag:"alice", t:"48217", ch:"Chat",    d:"Jun 22", s:96,  tags:["coached"]},
   {ag:"dave",  t:"48198", ch:"Chat",    d:"Jun 22", s:88,  tags:["coached"]},
   {ag:"bob",   t:"48270", ch:"Chat",    d:"Jun 22", s:83,  tags:[]},
-  {ag:"bob",   t:"48201", ch:"Call",    d:"Jun 21", s:72,  tags:["needs"], note:"Dead air and missed survey script."},
+  {ag:"bob",   t:"48201", ch:"Call",    d:"Jun 21", s:72,  tags:["needs"], note:"Dead air and an unclear solution."},
   {ag:"frank", t:"48250", ch:"Tickets", d:"Jun 21", s:64,  tags:["needs","disp"], note:"Dispute pending TL review."},
   {ag:"erin",  t:"48233", ch:"Chat",    d:"Jun 20", s:94,  tags:[]},
   {ag:"dave",  t:"48221", ch:"Call",    d:"Jun 20", s:79,  tags:["needs"]},
-  {ag:"carol", t:"48230", ch:"Tickets", d:"Jun 19", s:0,   tags:["crit","disp"], note:"Critical: wrong contact reason on closure."},
+  {ag:"carol", t:"48230", ch:"Tickets", d:"Jun 19", s:0,   tags:["crit","disp"], note:"Critical: gave inaccurate policy information."},
   {ag:"alice", t:"48190", ch:"Call",    d:"Jun 19", s:97,  tags:[]},
   {ag:"frank", t:"48175", ch:"Chat",    d:"Jun 18", s:90,  tags:["coached"]},
 ];
 
-// Per-eval criterion results (built so the totals are plausible)
 function breakdown(ev){
   const out=[]; let seed = parseInt(ev.t,10);
   const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
   SCORECARD.forEach(sec=>{
-    if(!sec.chans.includes(ev.ch)) { out.push({sec:sec.sec, items:sec.items.map(i=>({l:i.l,r:"na"}))}); return; }
+    if(!sec.chans.includes(ev.ch)){ out.push({sec:sec.sec, items:sec.items.map(i=>({l:i.l,r:"na"}))}); return; }
     out.push({sec:sec.sec, items:sec.items.map(i=>{
       let r="pass";
-      if(ev.s===0 && i.crit) r = (rnd()<.5)?"fail":"pass";
+      if(ev.s===0 && i.crit) r=(rnd()<.5)?"fail":"pass";
       else if(ev.s<85 && !i.crit && rnd()<.28) r="fail";
-      return {l:i.l, r, crit:i.crit, w:i.w};
+      return {l:i.l, r, crit:i.crit};
     })});
   });
   if(ev.s===0 && !out.some(s=>s.items.some(i=>i.crit&&i.r==="fail"))){
@@ -426,7 +518,7 @@ function tagBadges(tags){
 
 let activeFilter="all";
 function renderRows(){
-  const fa=document.getElementById('fAgent').value, fc=document.getElementById('fChannel').value, fs=document.getElementById('fStatus').value;
+  const fa=v('fAgent'), fc=v('fChannel'), fs=v('fStatus');
   const rows = EVALS.filter(e=>{
     if(activeFilter!=="all" && !e.tags.includes(activeFilter)) return false;
     if(fa && e.ag!==fa) return false;
@@ -434,21 +526,19 @@ function renderRows(){
     if(fs && !e.tags.includes(fs)) return false;
     return true;
   });
-  document.getElementById('rows').innerHTML = rows.map((e,i)=>{
+  document.getElementById('rows').innerHTML = rows.map(e=>{
     const a=AGENTS[e.ag];
-    return `<tr onclick="openDrawer(${EVALS.indexOf(e)})">
+    return `<tr class="clk" onclick="openDrawer(${EVALS.indexOf(e)})">
       <td><div class="agent-cell"><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>${a.n}</div></td>
-      <td><span class="ticket mono">#${e.t}</span></td>
-      <td>${channelBadge(e.ch)}</td>
-      <td class="mono" style="color:#94a3b8">${e.d}</td>
+      <td><span class="ticket">#${e.t}</span></td><td>${channelBadge(e.ch)}</td>
+      <td class="tnum" style="color:#94a3b8">${e.d}</td>
       <td><span class="score" style="color:${scoreColor(e.s)}">${e.s}%</span></td>
-      <td>${tagBadges(e.tags)}</td>
-    </tr>`;
+      <td>${tagBadges(e.tags)}</td></tr>`;
   }).join('') || `<tr><td colspan="6" style="text-align:center;color:#64748b;padding:28px">No evaluations match these filters.</td></tr>`;
 }
-function resetFilters(){activeFilter="all";document.getElementById('fAgent').value='';document.getElementById('fChannel').value='';document.getElementById('fStatus').value='';document.querySelectorAll('.kpi').forEach(k=>k.classList.remove('sel'));renderRows();}
+const v = id => document.getElementById(id).value;
+function resetFilters(){activeFilter="all";['fAgent','fChannel','fStatus'].forEach(i=>document.getElementById(i).value='');document.querySelectorAll('#kpis .kpi').forEach(k=>k.classList.remove('sel'));renderRows();}
 
-// Drawer
 function openDrawer(idx){
   const e=EVALS[idx], a=AGENTS[e.ag], bd=breakdown(e);
   let body=`<div class="dr-h"><div>
@@ -462,81 +552,115 @@ function openDrawer(idx){
         <div><div class="k">Date</div><div class="v">${e.d}, 2026</div></div>
         <div><div class="k">Score</div><div class="v" style="color:${scoreColor(e.s)}">${e.s}%</div></div>
         <div><div class="k">Evaluated by</div><div class="v">qa.lead@acme.com</div></div>
-        <div><div class="k">Team lead</div><div class="v">${e.ag==='dave'||e.ag==='erin'||e.ag==='frank'?'Team Beta':'Team Alpha'}</div></div>
+        <div><div class="k">Team</div><div class="v">${a.team}</div></div>
       </div>
       ${e.note?`<div style="font-size:12.5px;color:#cbd5e1;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:6px">${e.note}</div>`:''}`;
   bd.forEach(s=>{
     body+=`<div class="sec-lbl">${s.sec}</div>`;
     s.items.forEach(it=>{
-      const cls = it.r==="pass"?"r-pass":it.r==="fail"?"r-fail":"r-na";
-      const lbl = it.r==="pass"?"PASS":it.r==="fail"?"FAIL":"N/A";
+      const cls=it.r==="pass"?"r-pass":it.r==="fail"?"r-fail":"r-na", lbl=it.r==="pass"?"PASS":it.r==="fail"?"FAIL":"N/A";
       body+=`<div class="cr"><span class="crl">${it.l}${it.crit?' <span class="ctag" style="margin-left:4px">CRITICAL</span>':''}</span><span class="res ${cls}">${lbl}</span></div>`;
     });
   });
   body+=`</div>`;
-  document.getElementById('drawer').innerHTML=body;
-  document.getElementById('drawer').classList.add('open');
-  document.getElementById('drawer').setAttribute('aria-hidden','false');
+  const dr=document.getElementById('drawer'); dr.innerHTML=body; dr.classList.add('open'); dr.setAttribute('aria-hidden','false');
   document.getElementById('scrim').classList.add('open');
 }
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('scrim').classList.remove('open');document.getElementById('drawer').setAttribute('aria-hidden','true');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
 
-// KPI filtering
-document.querySelectorAll('.kpi').forEach(k=>k.addEventListener('click',()=>{
-  const f=k.dataset.f;
-  if(activeFilter===f||f==="all"){activeFilter="all";document.querySelectorAll('.kpi').forEach(x=>x.classList.remove('sel'));}
-  else{activeFilter=f;document.querySelectorAll('.kpi').forEach(x=>x.classList.remove('sel'));k.classList.add('sel');}
-  renderRows();
-}));
-['fAgent','fChannel','fStatus'].forEach(id=>document.getElementById(id).addEventListener('change',renderRows));
-
-// Agent filter options
-document.getElementById('fAgent').innerHTML='<option value="">All agents</option>'+Object.entries(AGENTS).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('');
-
-// ── Analysis: trend chart (inline SVG) ──
+// ── Analysis ──
 function renderTrend(){
-  const data=[82,84,83,87,85,88,86,90], target=85, W=520,H=190,pad=28;
-  const max=100,min=60, x=i=>pad+i*( (W-pad*2)/(data.length-1) ), y=v=>H-pad-((v-min)/(max-min))*(H-pad*2);
-  const pts=data.map((v,i)=>[x(i),y(v)]);
+  const data=[82,84,83,87,85,88,86,90], target=85, W=520,H=190,pad=28, max=100,min=60;
+  const x=i=>pad+i*((W-pad*2)/(data.length-1)), y=val=>H-pad-((val-min)/(max-min))*(H-pad*2);
+  const pts=data.map((val,i)=>[x(i),y(val)]);
   const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
-  const area=line+` L ${x(data.length-1).toFixed(1)} ${H-pad} L ${pad} ${H-pad} Z`;
-  const ty=y(target);
+  const area=line+` L ${x(data.length-1).toFixed(1)} ${H-pad} L ${pad} ${H-pad} Z`, ty=y(target);
   let grid='';for(let g=60;g<=100;g+=10){const gy=y(g);grid+=`<line x1="${pad}" y1="${gy}" x2="${W-pad}" y2="${gy}" stroke="rgba(255,255,255,.05)"/><text x="6" y="${gy+3}" fill="#475569" font-size="9">${g}</text>`;}
   const labels=['W1','W2','W3','W4','W5','W6','W7','W8'].map((l,i)=>`<text x="${x(i)}" y="${H-8}" fill="#64748b" font-size="9" text-anchor="middle">${l}</text>`).join('');
-  document.getElementById('trend').innerHTML=`
-    <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Score trend">
+  document.getElementById('trend').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Score trend">
       <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0ea5e9" stop-opacity=".35"/><stop offset="1" stop-color="#0ea5e9" stop-opacity="0"/></linearGradient></defs>
-      ${grid}
-      <line x1="${pad}" y1="${ty}" x2="${W-pad}" y2="${ty}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4 4" opacity=".7"/>
+      ${grid}<line x1="${pad}" y1="${ty}" x2="${W-pad}" y2="${ty}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4 4" opacity=".7"/>
       <text x="${W-pad}" y="${ty-5}" fill="#fbbf24" font-size="9" text-anchor="end">target ${target}%</text>
-      <path d="${area}" fill="url(#ag)"/>
-      <path d="${line}" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      ${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===pts.length-1?4.5:3}" fill="${i===pts.length-1?'#38bdf8':'#0b1120'}" stroke="#38bdf8" stroke-width="2"/>`).join('')}
-      ${labels}
-    </svg>`;
+      <path d="${area}" fill="url(#ag)"/><path d="${line}" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===pts.length-1?4.5:3}" fill="${i===pts.length-1?'#38bdf8':'#0b1120'}" stroke="#38bdf8" stroke-width="2"/>`).join('')}${labels}</svg>`;
 }
-function renderByChannel(){
-  const d=[["Chat",88,"#60a5fa"],["Call",81,"#c084fc"],["Tickets",84,"#f472b6"]];
-  document.getElementById('byChannel').innerHTML=d.map(([n,v,c])=>`
-    <div class="barrow"><span class="nm">${n}</span>
-      <div class="bartrack"><div class="barfill" style="width:${v}%;background:linear-gradient(90deg,${c}99,${c})"></div></div>
-      <span class="pct">${v}%</span></div>`).join('');
+function bars(el,data,fail){
+  document.getElementById(el).innerHTML=data.map(([n,val,c])=>`
+    <div class="barrow${fail?' fail':''}"><span class="nm" title="${n}">${n}</span>
+      <div class="bartrack"><div class="barfill" style="width:${fail?val*2.8:val}%${c?`;background:linear-gradient(90deg,${c}99,${c})`:''}"></div></div>
+      <span class="pct">${val}%</span></div>`).join('');
 }
-function renderFailed(){
-  const d=[["Avoiding dead air",31],["Correct grammar & spelling",24],["Using survey script",18],["Hold protocol",14],["Tone of voice",9]];
-  document.getElementById('failed').innerHTML=d.map(([n,v])=>`
-    <div class="barrow fail"><span class="nm" title="${n}">${n}</span>
-      <div class="bartrack"><div class="barfill" style="width:${v*2.6}%"></div></div>
-      <span class="pct">${v}%</span></div>`).join('');
+function renderCoaching(){
+  const d=[["dave",74,85],["bob",70,79],["frank",81,88]];
+  document.getElementById('coaching').innerHTML=d.map(([k,b,ar])=>{const a=AGENTS[k];return `
+    <div class="ci"><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>
+      <span class="nm">${a.n}</span><span class="ba">${b}%</span><span style="color:#475569">→</span>
+      <span class="ar">${ar}%</span><span class="up">+${ar-b}</span></div>`;}).join('');
 }
 function renderLeaderboard(){
   const d=[["alice",95.4,32],["erin",92.6,28],["frank",87.2,24],["dave",83.1,26],["bob",79.3,22],["carol",74.8,19]];
   document.getElementById('leaderboard').innerHTML=d.map(([k,s,n],i)=>{const a=AGENTS[k];return `
-    <div class="lb"><span class="rk">${i+1}</span>
-      <span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>
+    <div class="lb"><span class="rk">${i+1}</span><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>
       <div class="nm">${a.n}<div class="n2">${n} evaluations</div></div>
       <span class="score tnum" style="color:${scoreColor(s)}">${s}%</span></div>`;}).join('');
+}
+
+// ── Insights ──
+function renderInsights(){
+  const d=[
+    ["high","Dead air is your top failure driver","Minimized dead air / response gaps accounts for 28% of all fails, concentrated on Call. Bob and Dave drive most of it — a call-handling refresher would lift the channel average fastest."],
+    ["med","Carol Example is well below target","Avg 74.8% (10+ pts under the 85% target) with a critical miss this period. Prioritize a coaching session and a follow-up review next week."],
+    ["pos","Coaching is working","Agents coached this month improved +9 points on average afterward — Dave +11, Frank +7. Keep the cadence."],
+    ["info","Tickets channel trending up","Tickets rose +3 pts week-over-week to 84%; Chat steady at 88%. Call (81%) remains the lagging channel."]
+  ];
+  const tag={high:["st-high","High"],med:["st-med","Medium"],pos:["st-pos","Positive"],info:["st-info","Info"]};
+  const sev={high:"sev-high",med:"sev-med",pos:"sev-pos",info:"sev-info"};
+  document.getElementById('insightList').innerHTML=d.map(([s,t,b])=>`
+    <div class="insight"><div class="sev ${sev[s]}"></div><div>
+      <div class="it">${t}<span class="sevtag ${tag[s][0]}">${tag[s][1]}</span></div>
+      <div class="ib">${b}</div></div></div>`).join('');
+}
+
+// ── Disputes ──
+const DISPUTES=[
+  {ag:"carol",t:"48230",st:"pending_qa",sub:"Jun 19",upd:"Jun 21"},
+  {ag:"frank",t:"48250",st:"pending_tl",sub:"Jun 21",upd:"Jun 21"},
+  {ag:"bob",  t:"48201",st:"approved_qa",sub:"Jun 18",upd:"Jun 20"},
+  {ag:"dave", t:"48140",st:"approved_tl",sub:"Jun 16",upd:"Jun 17"},
+  {ag:"erin", t:"48099",st:"rejected_qa",sub:"Jun 14",upd:"Jun 15"},
+];
+const DST={pending_tl:["b-needs","Pending TL"],pending_qa:["b-needs","Pending QA"],approved_tl:["b-coached","Approved (TL)"],approved_qa:["b-coached","Approved"],rejected_qa:["b-crit","Rejected"]};
+function renderDisputes(){
+  document.getElementById('dispKpis').innerHTML=`
+    <div class="kpi" style="cursor:default"><div class="lbl">Total</div><div class="val tnum">5</div></div>
+    <div class="kpi" style="cursor:default"><div class="lbl">Pending</div><div class="val tnum">2</div></div>
+    <div class="kpi" style="cursor:default"><div class="lbl">Approved</div><div class="val tnum">2</div></div>
+    <div class="kpi" style="cursor:default"><div class="lbl">Rejected</div><div class="val tnum">1</div></div>`;
+  document.getElementById('dispRows').innerHTML=DISPUTES.map(x=>{const a=AGENTS[x.ag],st=DST[x.st];return `
+    <tr><td><div class="agent-cell"><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>${a.n}</div></td>
+      <td><span class="ticket">#${x.t}</span></td><td><span class="badge ${st[0]}">${st[1]}</span></td>
+      <td class="tnum" style="color:#94a3b8">${x.sub}</td><td class="tnum" style="color:#94a3b8">${x.upd}</td></tr>`;}).join('');
+}
+
+// ── Assignments ──
+function renderAssignments(){
+  const groups=[
+    {n:"Group A",qa:"qa.lead@acme.com",src:"auto",members:[["alice",true],["bob",true],["carol",false]]},
+    {n:"Group B",qa:"qa.two@acme.com",src:"override",members:[["dave",true],["erin",false],["frank",false]]},
+  ];
+  document.getElementById('groups').innerHTML=groups.map(g=>{
+    const done=g.members.filter(m=>m[1]).length, total=g.members.length, pct=Math.round(done/total*100);
+    const chips=g.members.map(([k,d])=>{const a=AGENTS[k];return `<span class="achip${d?' done':''}"><span class="ag-av" style="background:${a.c};width:20px;height:20px;font-size:9px">${initials(a.n)}</span>${a.n}${d?' ✓':''}</span>`;}).join('');
+    return `<div class="grp"><div class="grp-h">
+        <span class="gn">${g.n}</span>
+        <span class="src src-${g.src==='auto'?'auto':'over'}">${g.src}</span>
+        <span style="font-size:12px;color:var(--muted)">QA: <b style="color:#e2e8f0">${g.qa}</b></span>
+        <div class="prog" style="margin-left:auto"><div style="width:${pct}%"></div></div>
+        <span style="font-size:12px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums">${done}/${total} done</span>
+      </div><div class="achips">${chips}</div></div>`;
+  }).join('');
+  document.getElementById('pool').innerHTML=["qa.lead@acme.com","qa.two@acme.com"].map(q=>`<span class="achip">${q}</span>`).join('');
 }
 
 // ── Scorecard builder ──
@@ -544,70 +668,101 @@ function renderBuilder(){
   document.getElementById('builder').innerHTML=SCORECARD.map(sec=>{
     const chips=sec.chans.length===3?'<span class="chip" style="color:#94a3b8;border-color:rgba(148,163,184,.3);background:rgba(148,163,184,.1)">All channels</span>'
       :sec.chans.map(c=>`<span class="chip chip-on-${c==='Tickets'?'tkt':c.toLowerCase()}">${c}</span>`).join('');
-    const items=sec.items.map(i=>`<div class="crit-row"><span class="cl">${i.l}</span>
-      ${i.crit?'<span class="ctag">CRITICAL</span>':`<span class="wtag">${i.w} pts</span>`}</div>`).join('');
+    const items=sec.items.map(i=>`<div class="crit-row"><span class="cl">${i.l}</span>${i.crit?'<span class="ctag">CRITICAL</span>':`<span class="wtag">${i.w} pts</span>`}</div>`).join('');
     return `<div class="attr"><div class="attr-h"><span class="an">${sec.sec}</span><div class="chips" style="margin-left:auto">${chips}</div></div>${items}</div>`;
   }).join('');
 }
 
-// ── Evaluate form ──
-const EVAL_CHANNEL="Chat";
+// ── Evaluate ──
+let evalChannel="Chat";
 function renderEvalForm(){
-  const applicable=SCORECARD.filter(s=>s.chans.includes(EVAL_CHANNEL));
-  let h=`<div class="panel-h"><h3>Acme · Sample QA Scorecard</h3><span class="meta">Agent: Bob Example · Chat · #48291</span></div>`;
-  applicable.forEach((sec,si)=>{
-    h+=`<div class="sec-lbl" style="padding:14px 16px 0">${sec.sec}</div>`;
+  let h=`<div class="panel-h"><h3>Acme · Sample QA Scorecard</h3><span class="meta">live scoring</span></div>`;
+  h+=`<div class="evfields">
+    <div class="fld"><label>Agent</label><select class="sel">${Object.entries(AGENTS).map(([k,a])=>`<option${k==='bob'?' selected':''}>${a.n}</option>`).join('')}</select></div>
+    <div class="fld"><label>Ticket number</label><input class="sel" value="48291" placeholder="e.g. 48291"></div>
+    <div class="fld"><label>Channel</label><select class="sel" onchange="evalChannel=this.value;renderEvalForm()">${["Chat","Call","Tickets"].map(c=>`<option${c===evalChannel?' selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="fld"><label>Customer email</label><input class="sel" placeholder="customer@example.com"></div>
+    <div class="fld" style="grid-column:1/-1"><label>QA date</label><input class="sel" type="date" value="2026-06-24"></div>
+  </div>`;
+  SCORECARD.forEach((sec,si)=>{
+    const applic=sec.chans.includes(evalChannel);
+    h+=`<div class="sec-lbl" style="padding:14px 16px 0">${sec.sec}${applic?'':` · <span style="color:#475569;text-transform:none;letter-spacing:0;font-weight:500">N/A for ${evalChannel}</span>`}</div>`;
     sec.items.forEach((it,ii)=>{
       const id=`${si}-${ii}`;
-      const naBtn = it.crit?'':`<span class="pill p-idle" data-r="na" onclick="setPill('${id}','na',this)">N/A</span>`;
+      if(!applic){ h+=`<div class="ev-row locked" data-id="${id}" data-crit="0" data-w="0" data-r="na"><span class="el">${it.l}</span><span class="ev-pills"><span class="pill p-na">N/A</span></span></div>`; return; }
+      const naBtn=it.crit?'':`<span class="pill p-idle" data-r="na" onclick="setPill('${id}','na',this)">N/A</span>`;
       h+=`<div class="ev-row" data-id="${id}" data-crit="${it.crit?1:0}" data-w="${it.w}" data-r="pass">
             <span class="el">${it.l}${it.crit?' <span class="ctag" style="margin-left:5px">CRITICAL</span>':` <span class="wtag" style="margin-left:5px">${it.w}</span>`}</span>
-            <span class="ev-pills">
-              <span class="pill p-pass" data-r="pass" onclick="setPill('${id}','pass',this)">Pass</span>
-              <span class="pill p-idle" data-r="fail" onclick="setPill('${id}','fail',this)">Fail</span>
-              ${naBtn}
-            </span></div>`;
+            <span class="ev-pills"><span class="pill p-pass" data-r="pass" onclick="setPill('${id}','pass',this)">Pass</span>
+              <span class="pill p-idle" data-r="fail" onclick="setPill('${id}','fail',this)">Fail</span>${naBtn}</span></div>`;
     });
   });
   document.getElementById('evalForm').innerHTML=h;
   recompute();
 }
 function setPill(id,r,el){
-  const row=el.closest('.ev-row');
-  row.dataset.r=r;
-  row.querySelectorAll('.pill').forEach(p=>{
-    p.className='pill '+(p.dataset.r===r?('p-'+r):'p-idle');
-  });
+  const row=el.closest('.ev-row'); row.dataset.r=r;
+  row.querySelectorAll('.pill').forEach(p=>p.className='pill '+(p.dataset.r===r?('p-'+r):'p-idle'));
   recompute();
 }
 function recompute(){
   let score=100,err=0,crit=0,critFail=false;
   document.querySelectorAll('#evalForm .ev-row').forEach(row=>{
+    if(row.classList.contains('locked')) return;
     const r=row.dataset.r, isCrit=row.dataset.crit==="1", w=+row.dataset.w;
     if(r==="fail"){err++; if(isCrit){crit++;critFail=true;} else score-=w;}
   });
   if(critFail) score=0;
   const el=document.getElementById('liveScore');
-  el.innerHTML=`${score}<span style="font-size:24px;color:var(--faint)">%</span>`;
-  el.style.color=scoreColor(score);
-  document.getElementById('errCount').textContent=err;
-  document.getElementById('critCount').textContent=crit;
+  el.innerHTML=`${score}<span style="font-size:24px;color:var(--faint)">%</span>`; el.style.color=scoreColor(score);
+  document.getElementById('errCount').textContent=err; document.getElementById('critCount').textContent=crit;
   const note=document.getElementById('scoreNote');
   if(critFail){note.textContent="Critical failure — score zeroed";note.style.color="var(--red)";}
   else if(score>=85){note.textContent="On track";note.style.color="var(--emerald)";}
   else{note.textContent="Below 85% — needs coaching";note.style.color="var(--amber)";}
 }
 
-// Tabs
-function go(v){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
-  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active',s.id===v));
+// ── Team ──
+function renderTeam(){
+  document.getElementById('teamRows').innerHTML=Object.entries(AGENTS).map(([k,a])=>`
+    <tr><td><div class="agent-cell"><span class="ag-av" style="background:${a.c}">${initials(a.n)}</span>${a.n}</div></td>
+      <td style="color:#94a3b8">${k}@example.com</td><td>${a.team}</td><td style="color:#94a3b8">${a.tl}</td>
+      <td><span class="badge b-coached"><span class="dot" style="background:#34d399"></span>active</span></td></tr>`).join('');
+}
+
+// ── Permissions matrix ──
+function renderPermissions(){
+  const order=[["Results","results"],["Evaluate","evaluate"],["Disputes","disputes"],["Analysis","analysis"],
+    ["Insights","insights"],["Assignments","assignments"],["Team","team"],["Scorecards","scorecard"],["Permissions","permissions"]];
+  document.getElementById('permRows').innerHTML=order.map(([lbl,pg])=>`
+    <tr><td class="pg">${lbl}</td>${ROLES.map(r=>{const ok=PAGE_ACCESS[pg].includes(r);
+      return `<td class="cell">${ok?'<span class="yes">✓</span>':'<span class="no">·</span>'}</td>`;}).join('')}</tr>`).join('');
+}
+
+// ── Tabs / init ──
+function go(view){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===view));
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active',s.id===view));
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>go(t.dataset.v)));
+const roleSel=document.getElementById('roleAs');
+roleSel.innerHTML=ROLES.map(r=>`<option value="${r}"${r==='system_admin'?' selected':''}>View as: ${ROLE_LABELS[r]}</option>`).join('');
+roleSel.addEventListener('change',()=>{currentRole=roleSel.value;applyRole();});
+document.querySelectorAll('#kpis .kpi').forEach(k=>k.addEventListener('click',()=>{
+  const f=k.dataset.f;
+  if(activeFilter===f||f==="all"){activeFilter="all";document.querySelectorAll('#kpis .kpi').forEach(x=>x.classList.remove('sel'));}
+  else{activeFilter=f;document.querySelectorAll('#kpis .kpi').forEach(x=>x.classList.remove('sel'));k.classList.add('sel');}
+  renderRows();
+}));
+['fAgent','fChannel','fStatus'].forEach(id=>document.getElementById(id).addEventListener('change',renderRows));
+document.getElementById('fAgent').innerHTML='<option value="">All agents</option>'+Object.entries(AGENTS).map(([k,a])=>`<option value="${k}">${a.n}</option>`).join('');
 
-// Init
-renderRows(); renderTrend(); renderByChannel(); renderFailed(); renderLeaderboard(); renderBuilder(); renderEvalForm();
+renderRows(); renderTrend();
+bars('byChannel',[["Chat",88,"#60a5fa"],["Call",81,"#c084fc"],["Tickets",84,"#f472b6"]],false);
+bars('failed',[["Minimized dead air",28],["Correct grammar & spelling",22],["Followed the workflow",16],["Empathetic tone",11],["Confirmed resolution",8]],true);
+renderCoaching(); renderLeaderboard(); renderInsights(); renderDisputes(); renderAssignments();
+renderBuilder(); renderEvalForm(); renderTeam(); renderPermissions(); applyRole();
 </script>
 </body>
 </html>
