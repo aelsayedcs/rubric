@@ -1,17 +1,18 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import type { AppRole } from '@/types'
 import { Loading } from '@/components/Loading'
 import { cn } from '@/lib/utils'
 
 interface Page { key: string; label: string; section: string; roles: string[]; sort_order: number }
+interface RoleType { key: string; archived: boolean }
 
-// Editable role columns. system_admin is always-on (never removable → no lock-out).
-const ROLE_COLS: AppRole[] = ['system_admin', 'super_admin', 'admin', 'qa_evaluator', 'team_lead', 'agent', 'viewer']
-const LOCKED: AppRole[] = ['system_admin']
+// system_admin is always-on (never removable → no lock-out).
+const LOCKED: string[] = ['system_admin']
 
 export default function PermissionsPage() {
   const [pages, setPages] = useState<Page[]>([])
+  // Editable role columns come from the role catalog (active, non-archived).
+  const [roleCols, setRoleCols] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [forbidden, setForbidden] = useState(false)
   const [savingKey, setSavingKey] = useState('')
@@ -19,14 +20,21 @@ export default function PermissionsPage() {
 
   const load = useCallback(() => {
     setLoading(true)
-    fetch('/api/permissions').then(async r => {
-      if (r.status === 403) { setForbidden(true); setLoading(false); return null }
-      return r.json()
-    }).then(d => { if (d) { setPages(d.pages ?? []); setLoading(false) } }).catch(() => setLoading(false))
+    Promise.all([
+      fetch('/api/permissions').then(async r => r.status === 403 ? '__403__' : r.json()),
+      fetch('/api/roles').then(r => r.ok ? r.json() : { roles: [] }).catch(() => ({ roles: [] })),
+    ]).then(([perm, rl]) => {
+      if (perm === '__403__') { setForbidden(true); setLoading(false); return }
+      setPages(perm.pages ?? [])
+      const cols = (rl.roles as RoleType[] ?? []).filter(r => !r.archived).map(r => r.key)
+      // Keep system_admin first and always present even if hidden from the catalog.
+      setRoleCols(['system_admin', ...cols.filter(k => k !== 'system_admin')])
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [])
   useEffect(() => { load() }, [load])
 
-  async function toggle(page: Page, role: AppRole) {
+  async function toggle(page: Page, role: string) {
     if (LOCKED.includes(role)) return
     const has = page.roles.includes(role)
     const roles = has ? page.roles.filter(r => r !== role) : [...page.roles, role]
@@ -64,7 +72,7 @@ export default function PermissionsPage() {
               <thead>
                 <tr>
                   <th>Page</th>
-                  {ROLE_COLS.map(r => <th key={r} className="text-center text-[10px]">{r}</th>)}
+                  {roleCols.map(r => <th key={r} className="text-center text-[10px]">{r}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -74,7 +82,7 @@ export default function PermissionsPage() {
                       <p className="text-slate-200 text-sm font-medium">{p.label}</p>
                       <p className="text-slate-600 text-[10px] font-mono">{p.key}</p>
                     </td>
-                    {ROLE_COLS.map(role => {
+                    {roleCols.map(role => {
                       const on = p.roles.includes(role)
                       const locked = LOCKED.includes(role)
                       return (
